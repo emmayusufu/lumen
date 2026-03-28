@@ -8,10 +8,10 @@ def coder_node(state: dict) -> dict:
     all_results = []
 
     for task in state["sub_tasks"]:
-        github_results = search_github_code(task)
+        github_results = search_github_code.invoke({"query": task})
 
         for gr in github_results[:3]:
-            page = read_url(gr["url"])
+            page = read_url.invoke({"url": gr["url"]})
 
             if "error" in page:
                 continue

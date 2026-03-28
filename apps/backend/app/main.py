@@ -4,6 +4,7 @@ from typing import Literal
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from langchain_core.messages import HumanMessage
 from pydantic import BaseModel
 
@@ -13,8 +14,8 @@ app = FastAPI(title="LangGraph Research Assistant")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -34,25 +35,28 @@ async def health():
 
 @app.post("/api/research")
 async def research(request: ResearchRequest):
-    result = await asyncio.to_thread(
-        graph.invoke,
-        {
-            "query": request.query,
-            "sub_tasks": [],
-            "research_results": [],
-            "code_results": [],
-            "synthesis": "",
-            "output": "",
-            "output_mode": request.output_mode,
-            "messages": [HumanMessage(content=request.query)],
-            "next_agent": "",
-        },
-    )
-    return {
-        "output": result.get("output", ""),
-        "research_results": result.get("research_results", []),
-        "code_results": result.get("code_results", []),
-    }
+    try:
+        result = await asyncio.to_thread(
+            graph.invoke,
+            {
+                "query": request.query,
+                "sub_tasks": [],
+                "research_results": [],
+                "code_results": [],
+                "synthesis": "",
+                "output": "",
+                "output_mode": request.output_mode,
+                "messages": [HumanMessage(content=request.query)],
+                "next_agent": "",
+            },
+        )
+        return {
+            "output": result.get("output", ""),
+            "research_results": result.get("research_results", []),
+            "code_results": result.get("code_results", []),
+        }
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 
 @app.websocket("/ws/research")

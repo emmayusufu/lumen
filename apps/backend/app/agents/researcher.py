@@ -8,10 +8,10 @@ def researcher_node(state: dict) -> dict:
     all_results = []
 
     for task in state["sub_tasks"]:
-        search_results = search_web(task)
+        search_results = search_web.invoke({"query": task})
 
         for sr in search_results[:3]:
-            page = read_url(sr["url"])
+            page = read_url.invoke({"url": sr["url"]})
 
             if "error" in page:
                 continue

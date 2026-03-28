@@ -4,7 +4,7 @@ services:
       context: ./apps/backend
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8010:8000"
     env_file:
       - .env
     healthcheck:
@@ -20,10 +20,10 @@ services:
       context: ./apps/web
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3200:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000
-      - NEXT_PUBLIC_WS_URL=ws://backend:8000
+      - NEXT_PUBLIC_API_URL=http://localhost:8010
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8010
     depends_on:
       backend:
         condition: service_healthy

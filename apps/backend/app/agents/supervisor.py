@@ -4,7 +4,6 @@ from langchain_core.messages import SystemMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END
 from langgraph.types import Command
-from pydantic import BaseModel, Field
 
 from app.config import settings
 
@@ -31,13 +30,11 @@ Current state summary:
 - Sub-tasks: {sub_task_count}
 - Research results: {research_count}
 - Code results: {code_count}
-- Has output: {has_output}"""
+- Has output: {has_output}
 
+Respond with ONLY one word: planner, researcher, coder, writer, or FINISH."""
 
-class Router(BaseModel):
-    next: Literal["planner", "researcher", "coder", "writer", "FINISH"] = Field(
-        description="The next agent to route to, or FINISH if done."
-    )
+VALID_AGENTS = {"planner", "researcher", "coder", "writer", "FINISH"}
 
 
 def supervisor_node(
@@ -50,12 +47,19 @@ def supervisor_node(
         has_output=bool(state.get("output", "")),
     )
 
-    response = llm.with_structured_output(Router).invoke(
+    response = llm.invoke(
         [SystemMessage(content=prompt)] + state["messages"]
     )
 
-    goto = response.next
-    if goto == "FINISH":
-        goto = END
+    choice = response.content.strip().lower()
+    for agent in VALID_AGENTS:
+        if agent.lower() in choice:
+            choice = agent
+            break
+    else:
+        choice = "planner"
 
-    return Command(goto=goto, update={"next_agent": goto})
+    if choice == "FINISH":
+        choice = END
+
+    return Command(goto=choice, update={"next_agent": choice})
