@@ -35,18 +35,24 @@ docker compose up --build
 
 ### Run Locally (Development)
 
-**Backend:**
+**Both (via Turborepo):**
 ```bash
-cd backend
+npm install
+npx turbo dev
+```
+
+**Backend only:**
+```bash
+cd apps/backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-**Frontend:**
+**Frontend only:**
 ```bash
-cd frontend
+cd apps/web
 npm install
 npm run dev
 ```
@@ -54,7 +60,7 @@ npm run dev
 ### Run Tests
 
 ```bash
-cd backend
+cd apps/backend
 source .venv/bin/activate
 pytest tests/ -v
 ```
@@ -62,26 +68,31 @@ pytest tests/ -v
 ## Project Structure
 
 ```
-├── backend/
-│   ├── app/
-│   │   ├── agents/        # LangGraph agent nodes
-│   │   ├── tools/         # Search, scraping, GitHub tools
-│   │   ├── config.py      # Environment config
-│   │   ├── graph.py       # LangGraph workflow
-│   │   ├── main.py        # FastAPI server
-│   │   └── state.py       # Shared state definition
-│   ├── tests/
-│   ├── Dockerfile
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── app/           # Next.js pages and layout
-│   │   ├── components/    # UI components by domain
-│   │   ├── hooks/         # React hooks
-│   │   └── lib/           # Types and API client
-│   ├── Dockerfile
-│   └── package.json
-└── docker-compose.yml
+├── apps/
+│   ├── backend/
+│   │   ├── app/
+│   │   │   ├── agents/      # LangGraph agent nodes
+│   │   │   ├── tools/       # Search, scraping, GitHub tools
+│   │   │   ├── config.py    # Environment config
+│   │   │   ├── graph.py     # LangGraph workflow
+│   │   │   ├── main.py      # FastAPI server
+│   │   │   └── state.py     # Shared state definition
+│   │   ├── tests/
+│   │   ├── Dockerfile
+│   │   └── requirements.txt
+│   └── web/
+│       ├── src/
+│       │   ├── app/         # Next.js pages and layout
+│       │   ├── components/  # UI components by domain
+│       │   ├── hooks/       # React hooks
+│       │   └── lib/         # Types and API client
+│       ├── Dockerfile
+│       └── package.json
+├── packages/
+│   └── tsconfig/            # Shared TypeScript config
+├── turbo.json
+├── docker-compose.yml
+└── package.json
 ```
 
 ## Configuration

@@ -1,0 +1,19 @@
+{
+  "name": "langgraph-research-assistant",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "format": "turbo format",
+    "test:backend": "cd apps/backend && pytest tests/ -v"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0"
+  },
+  "packageManager": "npm@10.9.2"
+}
