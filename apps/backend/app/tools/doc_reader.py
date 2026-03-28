@@ -7,7 +7,7 @@ from langchain_core.tools import tool
 def read_url(url: str) -> dict:
     """Fetch a URL and extract the main text content."""
     try:
-        response = httpx.get(url, timeout=10, follow_redirects=True, verify=False)
+        response = httpx.get(url, timeout=5, follow_redirects=True, verify=False)
         response.raise_for_status()
     except (httpx.HTTPError, httpx.TimeoutException) as e:
         return {"error": str(e), "url": url}
