@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type {
-  ChatMessage,
-  OutputMode,
-  ResearchResult,
-  AgentUpdate,
-} from "@/lib/types";
+import type { ChatMessage, OutputMode, ResearchResult } from "@/lib/types";
 import { postResearch } from "@/lib/api";
 
 interface UseChatReturn {
@@ -17,7 +12,6 @@ interface UseChatReturn {
   lastOutput: string;
   sources: ResearchResult[];
   sendMessage: (content: string) => Promise<void>;
-  handleAgentUpdate: (update: AgentUpdate) => void;
 }
 
 export function useChat(): UseChatReturn {
@@ -44,7 +38,7 @@ export function useChat(): UseChatReturn {
         const assistantMsg: ChatMessage = {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: result.output || "No results found.",
+          content: result.output || result.error || "No results found.",
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, assistantMsg]);
@@ -65,18 +59,6 @@ export function useChat(): UseChatReturn {
     [outputMode],
   );
 
-  const handleAgentUpdate = useCallback((update: AgentUpdate) => {
-    if (update.type === "done") {
-      setIsLoading(false);
-    }
-    if (update.data?.output) {
-      setLastOutput(update.data.output);
-    }
-    if (update.data?.research_results) {
-      setSources(update.data.research_results);
-    }
-  }, []);
-
   return {
     messages,
     isLoading,
@@ -85,6 +67,5 @@ export function useChat(): UseChatReturn {
     lastOutput,
     sources,
     sendMessage,
-    handleAgentUpdate,
   };
 }

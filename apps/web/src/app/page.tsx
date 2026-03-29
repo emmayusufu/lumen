@@ -1,28 +1,17 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MessageList } from "@/components/chat/MessageList";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { ReportView } from "@/components/report/ReportView";
-import { AgentActivity } from "@/components/agent/AgentActivity";
 import { useChat } from "@/hooks/useChat";
-import { useWebSocket } from "@/hooks/useWebSocket";
-import type { AgentUpdate } from "@/lib/types";
-
-const AGENT_NAMES = ["supervisor", "planner", "researcher", "coder", "writer"];
-
-type AgentStatus = "pending" | "active" | "done";
-
-interface AgentState {
-  name: string;
-  status: AgentStatus;
-  message?: string;
-}
 
 export default function HomePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -36,47 +25,10 @@ export default function HomePage() {
     lastOutput,
     sources,
     sendMessage,
-    handleAgentUpdate,
   } = useChat();
-
-  const [agentStates, setAgentStates] = useState<AgentState[]>(
-    AGENT_NAMES.map((name) => ({ name, status: "pending" })),
-  );
-
-  const onAgentMessage = useCallback(
-    (update: AgentUpdate) => {
-      handleAgentUpdate(update);
-
-      if (update.type === "agent_update" && update.agent) {
-        setAgentStates((prev) =>
-          prev.map((a) => {
-            if (a.name === update.agent) {
-              return { ...a, status: "active" as const, message: "Working..." };
-            }
-            if (a.status === "active" && a.name !== update.agent) {
-              return { ...a, status: "done" as const };
-            }
-            return a;
-          }),
-        );
-      }
-
-      if (update.type === "done") {
-        setAgentStates((prev) =>
-          prev.map((a) => ({ ...a, status: "done" as const })),
-        );
-      }
-    },
-    [handleAgentUpdate],
-  );
-
-  useWebSocket(onAgentMessage);
 
   const handleSend = async (content: string) => {
     setShowReport(false);
-    setAgentStates(
-      AGENT_NAMES.map((name) => ({ name, status: "pending" as AgentStatus })),
-    );
     await sendMessage(content);
   };
 
@@ -91,7 +43,14 @@ export default function HomePage() {
       />
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <Toolbar />
-        <AgentActivity agents={agentStates} visible={isLoading} />
+        {isLoading && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2, py: 1 }}>
+            <CircularProgress size={20} />
+            <Typography variant="body2" color="text.secondary">
+              Researching...
+            </Typography>
+          </Box>
+        )}
         {showReport && lastOutput ? (
           <ReportView
             content={lastOutput}
