@@ -36,25 +36,30 @@ async def health():
 @app.post("/api/research")
 async def research(request: ResearchRequest):
     try:
-        result = await asyncio.to_thread(
-            graph.invoke,
-            {
-                "query": request.query,
-                "sub_tasks": [],
-                "research_results": [],
-                "code_results": [],
-                "synthesis": "",
-                "output": "",
-                "output_mode": request.output_mode,
-                "messages": [HumanMessage(content=request.query)],
-                "next_agent": "",
-            },
+        result = await asyncio.wait_for(
+            asyncio.to_thread(
+                graph.invoke,
+                {
+                    "query": request.query,
+                    "sub_tasks": [],
+                    "research_results": [],
+                    "code_results": [],
+                    "synthesis": "",
+                    "output": "",
+                    "output_mode": request.output_mode,
+                    "messages": [HumanMessage(content=request.query)],
+                    "next_agent": "",
+                },
+            ),
+            timeout=120,
         )
         return {
             "output": result.get("output", ""),
             "research_results": result.get("research_results", []),
             "code_results": result.get("code_results", []),
         }
+    except asyncio.TimeoutError:
+        return JSONResponse(status_code=504, content={"error": "Request timed out after 120 seconds"})
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
