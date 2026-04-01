@@ -1,5 +1,9 @@
 {
   "name": "zitadel-init",
   "type": "module",
-  "engines": { "node": ">=20" }
+  "engines": { "node": ">=20" },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "@types/node": "^22.0.0"
+  }
 }

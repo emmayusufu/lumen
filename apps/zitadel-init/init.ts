@@ -12,7 +12,20 @@ const ZITADEL_ISSUER = `http://${ZITADEL_HOST_HEADER}`;
 const NEXTAUTH_REDIRECT_URI =
   process.env.NEXTAUTH_REDIRECT_URI ?? "http://localhost:3000/api/auth/callback/zitadel";
 
-function httpFetch(urlStr, { method = "GET", headers = {}, body } = {}) {
+interface FetchResponse {
+  ok: boolean;
+  status: number;
+  text: () => Promise<string>;
+  json: () => Promise<unknown>;
+}
+
+interface FetchOptions {
+  method?: string;
+  headers?: Record<string, string | number>;
+  body?: string;
+}
+
+function httpFetch(urlStr: string, { method = "GET", headers = {}, body }: FetchOptions = {}): Promise<FetchResponse> {
   return new Promise((resolve, reject) => {
     const parsed = new URL(urlStr);
     const opts = {
@@ -23,13 +36,13 @@ function httpFetch(urlStr, { method = "GET", headers = {}, body } = {}) {
       headers: { Host: ZITADEL_HOST_HEADER, ...headers },
     };
     const req = httpRequest(opts, (res) => {
-      const chunks = [];
-      res.on("data", (c) => chunks.push(c));
+      const chunks: Buffer[] = [];
+      res.on("data", (c: Buffer) => chunks.push(c));
       res.on("end", () => {
         const text = Buffer.concat(chunks).toString();
         resolve({
-          ok: res.statusCode >= 200 && res.statusCode < 300,
-          status: res.statusCode,
+          ok: (res.statusCode ?? 0) >= 200 && (res.statusCode ?? 0) < 300,
+          status: res.statusCode ?? 0,
           text: () => Promise.resolve(text),
           json: () => Promise.resolve(JSON.parse(text)),
         });
@@ -41,7 +54,7 @@ function httpFetch(urlStr, { method = "GET", headers = {}, body } = {}) {
   });
 }
 
-async function waitForZitadel() {
+async function waitForZitadel(): Promise<void> {
   for (let i = 0; i < 30; i++) {
     try {
       const res = await httpFetch(`${ZITADEL_URL}/debug/healthz`);
@@ -54,7 +67,13 @@ async function waitForZitadel() {
   throw new Error("Zitadel did not become healthy in time");
 }
 
-function buildJwt(keyData) {
+interface KeyData {
+  keyId: string;
+  userId: string;
+  key: string;
+}
+
+function buildJwt(keyData: KeyData): string {
   const now = Math.floor(Date.now() / 1000);
   const header = Buffer.from(
     JSON.stringify({ alg: "RS256", kid: keyData.keyId })
@@ -74,7 +93,7 @@ function buildJwt(keyData) {
   return `${header}.${payload}.${sig}`;
 }
 
-async function getAccessToken(keyData) {
+async function getAccessToken(keyData: KeyData): Promise<string> {
   const jwt = buildJwt(keyData);
   const body = new URLSearchParams({
     grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
@@ -86,12 +105,12 @@ async function getAccessToken(keyData) {
     headers: { "Content-Type": "application/x-www-form-urlencoded", "Content-Length": Buffer.byteLength(body) },
     body,
   });
-  const data = await res.json();
+  const data = await res.json() as { access_token?: string };
   if (!data.access_token) throw new Error(`Token exchange failed: ${JSON.stringify(data)}`);
   return data.access_token;
 }
 
-async function makeRequest(token, method, path, body) {
+async function makeRequest(token: string, method: string, path: string, body?: unknown): Promise<FetchResponse> {
   const bodyStr = body ? JSON.stringify(body) : undefined;
   return httpFetch(`${ZITADEL_URL}${path}`, {
     method,
@@ -104,7 +123,7 @@ async function makeRequest(token, method, path, body) {
   });
 }
 
-async function api(token, method, path, body) {
+async function api(token: string, method: string, path: string, body?: unknown): Promise<unknown> {
   const res = await makeRequest(token, method, path, body);
   if (!res.ok) {
     const text = await res.text();
@@ -113,7 +132,7 @@ async function api(token, method, path, body) {
   return res.json();
 }
 
-async function apiMaybeConflict(token, method, path, body) {
+async function apiMaybeConflict(token: string, method: string, path: string, body?: unknown): Promise<unknown> {
   const res = await makeRequest(token, method, path, body);
   if (res.status === 409) return null;
   if (!res.ok) {
@@ -123,9 +142,9 @@ async function apiMaybeConflict(token, method, path, body) {
   return res.json();
 }
 
-async function main() {
+async function main(): Promise<void> {
   await waitForZitadel();
-  const keyData = JSON.parse(readFileSync(MACHINE_KEY_PATH, "utf8"));
+  const keyData: KeyData = JSON.parse(readFileSync(MACHINE_KEY_PATH, "utf8"));
   const token = await getAccessToken(keyData);
 
   const githubId = process.env.GITHUB_CLIENT_ID;
@@ -155,9 +174,11 @@ async function main() {
   let project = await apiMaybeConflict(token, "POST", "/management/v1/projects", {
     name: "Writing Platform",
     projectRoleAssertion: true,
-  });
+  }) as { id: string } | null;
   if (!project) {
-    const search = await api(token, "POST", "/management/v1/projects/_search", { queries: [{ nameQuery: { name: "Writing Platform", method: "TEXT_QUERY_METHOD_EQUALS" } }] });
+    const search = await api(token, "POST", "/management/v1/projects/_search", {
+      queries: [{ nameQuery: { name: "Writing Platform", method: "TEXT_QUERY_METHOD_EQUALS" } }],
+    }) as { result?: { id: string }[] };
     project = search.result?.[0] ?? (() => { throw new Error("Project not found after conflict"); })();
   }
 
@@ -178,7 +199,7 @@ async function main() {
       postLogoutRedirectUris: ["http://localhost:3000"],
       accessTokenType: "OIDC_TOKEN_TYPE_JWT",
     }
-  );
+  ) as { clientId: string; clientSecret: string } | null;
 
   try {
     await api(token, "PUT", "/admin/v1/settings/oidc", {
@@ -188,12 +209,15 @@ async function main() {
       refreshTokenExpiration: "2592000s",
     });
   } catch (err) {
-    // 400 means settings already configured — not an error
-    if (!err.message.includes("400")) throw err;
+    if (!(err instanceof Error) || !err.message.includes("400")) throw err;
   }
 
   if (!oidcApp) {
-    const apps = await api(token, "GET", `/management/v1/projects/${project.id}/apps/_search`);
+    const apps = await api(
+      token,
+      "GET",
+      `/management/v1/projects/${project.id}/apps/_search`
+    ) as { result?: { id: string; name: string }[] };
     const existing = apps.result?.find((a) => a.name === "Web");
     if (existing) {
       console.log("\n=== OIDC App (existing) ===");
@@ -212,6 +236,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error(err.message);
+  console.error(err instanceof Error ? err.message : err);
   process.exit(1);
 });

@@ -178,7 +178,7 @@ services:
     volumes:
       - ./apps/zitadel-init:/app
       - zitadel_machinekey:/machinekey
-    command: node init.mjs
+    command: sh -c "npm install && npx tsx init.ts"
     environment:
       ZITADEL_URL: http://zitadel:8080
       ZITADEL_DOMAIN: ${ZITADEL_DOMAIN:-localhost}
