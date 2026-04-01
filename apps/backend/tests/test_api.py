@@ -10,13 +10,10 @@ def test_health_endpoint():
     assert response.json() == {"status": "ok"}
 
 
-def test_research_endpoint_accepts_post():
+def test_research_endpoint_requires_auth():
     client = TestClient(app, raise_server_exceptions=False)
     response = client.post(
         "/api/research",
-        json={
-            "query": "test query",
-            "output_mode": "chat",
-        },
+        json={"query": "test query", "output_mode": "chat"},
     )
-    assert response.status_code in (200, 500)
+    assert response.status_code == 401
