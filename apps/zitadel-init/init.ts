@@ -11,6 +11,7 @@ const ZITADEL_HOST_HEADER = ZITADEL_PORT === "80" ? ZITADEL_DOMAIN : `${ZITADEL_
 const ZITADEL_ISSUER = `http://${ZITADEL_HOST_HEADER}`;
 const NEXTAUTH_REDIRECT_URI =
   process.env.NEXTAUTH_REDIRECT_URI ?? "http://localhost:3000/api/auth/callback/zitadel";
+const LOGIN_BASE_URI = new URL(NEXTAUTH_REDIRECT_URI).origin + "/auth";
 
 interface FetchResponse {
   ok: boolean;
@@ -142,10 +143,71 @@ async function apiMaybeConflict(token: string, method: string, path: string, bod
   return res.json();
 }
 
+
+async function applyBranding(token: string): Promise<void> {
+  // Apply teal colour scheme + Nunito font matching the web app theme.
+  // Logo upload requires gRPC streaming (not available via REST in v4); set it
+  // manually in the Zitadel console or serve /logo.svg from the web app.
+  await api(token, "PUT", "/admin/v1/policies/label", {
+    primaryColor: "#0d9488",
+    backgroundColor: "#f8fafb",
+    warnColor: "#f43f5e",
+    fontColor: "#0f172a",
+    primaryColorDark: "#2dd4bf",
+    backgroundColorDark: "#0b1120",
+    warnColorDark: "#f43f5e",
+    fontColorDark: "#e2e8f0",
+    themeMode: "THEME_MODE_AUTO",
+    fontUrl: "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap",
+    disableWatermark: true,
+    hideLoginNameSuffix: false,
+    errorMsgPopup: false,
+    disableEmailVerifyButton: false,
+  });
+  await api(token, "POST", "/admin/v1/policies/label/_activate");
+  console.log("Branding applied");
+}
+
+async function setupLoginClient(token: string): Promise<void> {
+  const user = await apiMaybeConflict(token, "POST", "/management/v1/users/machine", {
+    userName: "login-client",
+    name: "Login Client",
+  }) as { userId: string } | null;
+
+  let userId: string;
+  if (user) {
+    userId = user.userId;
+  } else {
+    const search = await api(token, "POST", "/management/v1/users/_search", {
+      queries: [{ userNameQuery: { userName: "login-client", method: "TEXT_QUERY_METHOD_EQUALS" } }],
+    }) as { result?: { userId: string }[] };
+    userId = search.result?.[0]?.userId
+      ?? (() => { throw new Error("login-client user not found after conflict"); })();
+  }
+
+  await apiMaybeConflict(token, "POST", "/admin/v1/members", {
+    userId,
+    roles: ["IAM_LOGIN_CLIENT"],
+  });
+
+  const patRes = await makeRequest(token, "POST", `/v2/users/${userId}/pats`);
+  const patData = await patRes.json() as { token?: string };
+  if (patRes.ok && patData.token) {
+    console.log("\n=== Login Client ===");
+    console.log(`ZITADEL_LOGIN_CLIENT_TOKEN=${patData.token}`);
+    console.log("Add to .env");
+  } else {
+    console.log("Login client already configured — manage PATs via Zitadel console if needed");
+  }
+}
+
 async function main(): Promise<void> {
   await waitForZitadel();
   const keyData: KeyData = JSON.parse(readFileSync(MACHINE_KEY_PATH, "utf8"));
   const token = await getAccessToken(keyData);
+
+  await applyBranding(token);
+  await setupLoginClient(token);
 
   const githubId = process.env.GITHUB_CLIENT_ID;
   const githubSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -189,6 +251,7 @@ async function main(): Promise<void> {
     {
       name: "Web",
       redirectUris: [NEXTAUTH_REDIRECT_URI],
+      loginBaseUri: LOGIN_BASE_URI,
       responseTypes: ["OIDC_RESPONSE_TYPE_CODE"],
       grantTypes: [
         "OIDC_GRANT_TYPE_AUTHORIZATION_CODE",
