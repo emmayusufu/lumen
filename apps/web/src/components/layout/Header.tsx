@@ -7,6 +7,8 @@ import Tooltip from "@mui/material/Tooltip";
 import Chip from "@mui/material/Chip";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import { signOut } from "next-auth/react";
 import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
@@ -149,6 +151,21 @@ export function Header({ onClear, activeAgent, isLoading }: HeaderProps) {
         </Tooltip>
 
         <ThemeToggle />
+
+        <Tooltip title="Sign out" arrow>
+          <IconButton
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            size="small"
+            sx={{
+              width: 28,
+              height: 28,
+              color: "text.secondary",
+              "&:hover": { color: "text.primary" },
+            }}
+          >
+            <LogoutRoundedIcon sx={{ fontSize: 15 }} />
+          </IconButton>
+        </Tooltip>
       </Box>
     </Box>
   );

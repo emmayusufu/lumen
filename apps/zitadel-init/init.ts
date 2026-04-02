@@ -196,7 +196,7 @@ async function main(): Promise<void> {
       ],
       appType: "OIDC_APP_TYPE_WEB",
       authMethodType: "OIDC_AUTH_METHOD_TYPE_BASIC",
-      postLogoutRedirectUris: ["http://localhost:3000"],
+      postLogoutRedirectUris: [new URL(NEXTAUTH_REDIRECT_URI).origin],
       accessTokenType: "OIDC_TOKEN_TYPE_JWT",
     }
   ) as { clientId: string; clientSecret: string } | null;
