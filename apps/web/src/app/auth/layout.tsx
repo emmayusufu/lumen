@@ -8,6 +8,21 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 
+type CircleDecor = {
+  size: number;
+  opacity: number;
+  top?: number | string;
+  bottom?: number;
+  left?: number;
+  right?: number;
+};
+
+const CIRCLES: CircleDecor[] = [
+  { size: 340, top: -80, right: -100, opacity: 0.06 },
+  { size: 200, bottom: 60, left: -60, opacity: 0.05 },
+  { size: 120, top: "40%", right: 40, opacity: 0.07 },
+];
+
 const FEATURES = [
   { icon: SearchIcon, text: "Web & academic search across multiple sources" },
   { icon: AutoAwesomeIcon, text: "Multi-agent reasoning with LangGraph" },
@@ -34,11 +49,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           overflow: "hidden",
         }}
       >
-        {[
-          { size: 340, top: -80, right: -100, opacity: 0.06 },
-          { size: 200, bottom: 60, left: -60, opacity: 0.05 },
-          { size: 120, top: "40%", right: 40, opacity: 0.07 },
-        ].map((c, i) => (
+        {CIRCLES.map((c, i) => (
           <Box
             key={i}
             sx={{
@@ -50,8 +61,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               borderColor: "primary.main",
               opacity: c.opacity,
               top: c.top,
-              bottom: (c as { bottom?: number }).bottom,
-              left: (c as { left?: number }).left,
+              bottom: c.bottom,
+              left: c.left,
               right: c.right,
               pointerEvents: "none",
             }}
