@@ -1,3 +1,5 @@
+import type { Session, SessionDetail } from "@/lib/types";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8742";
 
 export async function postResearch(query: string) {
@@ -15,6 +17,7 @@ export async function postResearch(query: string) {
 export interface StreamEvent {
   agent?: string;
   type?: string;
+  session_id?: string;
   data?: {
     output?: string;
     research_results?: Array<{
@@ -66,4 +69,21 @@ export async function streamResearch(
       }
     }
   }
+}
+
+export async function fetchSessions(): Promise<Session[]> {
+  const response = await fetch(`${API_BASE}/api/sessions`);
+  if (!response.ok) throw new Error(`Failed to fetch sessions: ${response.statusText}`);
+  return response.json();
+}
+
+export async function fetchSession(id: string): Promise<SessionDetail> {
+  const response = await fetch(`${API_BASE}/api/sessions/${id}`);
+  if (!response.ok) throw new Error(`Failed to fetch session: ${response.statusText}`);
+  return response.json();
+}
+
+export async function deleteSession(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/sessions/${id}`, { method: "DELETE" });
+  if (!response.ok) throw new Error(`Failed to delete session: ${response.statusText}`);
 }
