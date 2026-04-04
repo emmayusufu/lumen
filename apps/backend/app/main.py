@@ -11,6 +11,7 @@ from app.db import close_pool, init_pool
 from app.graph import build_graph
 from app.middleware.auth import attach_user, current_user
 from app.models.user import User
+from app.routers.sessions import router as sessions_router
 
 
 @asynccontextmanager
@@ -33,6 +34,7 @@ app.add_middleware(
 )
 
 graph = build_graph()
+app.include_router(sessions_router)
 
 
 def _initial_state(query: str) -> dict:
