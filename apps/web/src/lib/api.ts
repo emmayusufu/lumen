@@ -1,4 +1,4 @@
-import type { Session, SessionDetail } from "@/lib/types";
+import type { Session, SessionDetail, Doc, DocDetail, UserSearchResult } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8742";
 
@@ -86,4 +86,69 @@ export async function fetchSession(id: string): Promise<SessionDetail> {
 export async function deleteSession(id: string): Promise<void> {
   const response = await fetch(`${API_BASE}/api/sessions/${id}`, { method: "DELETE" });
   if (!response.ok) throw new Error(`Failed to delete session: ${response.statusText}`);
+}
+
+export async function fetchDocs(): Promise<Doc[]> {
+  const response = await fetch(`${API_BASE}/api/content/docs`);
+  if (!response.ok) throw new Error(`Failed to fetch docs: ${response.statusText}`);
+  return response.json();
+}
+
+export async function createDoc(title = "Untitled"): Promise<{ id: string }> {
+  const response = await fetch(`${API_BASE}/api/content/docs`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  });
+  if (!response.ok) throw new Error(`Failed to create doc: ${response.statusText}`);
+  return response.json();
+}
+
+export async function fetchDoc(id: string): Promise<DocDetail> {
+  const response = await fetch(`${API_BASE}/api/content/docs/${id}`);
+  if (!response.ok) throw new Error(`Failed to fetch doc: ${response.statusText}`);
+  return response.json();
+}
+
+export async function updateDoc(id: string, patch: { title?: string; content?: string }): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/content/docs/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  if (!response.ok) throw new Error(`Failed to update doc: ${response.statusText}`);
+}
+
+export async function deleteDoc(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/content/docs/${id}`, { method: "DELETE" });
+  if (!response.ok) throw new Error(`Failed to delete doc: ${response.statusText}`);
+}
+
+export async function searchUsers(email: string): Promise<UserSearchResult[]> {
+  const response = await fetch(
+    `${API_BASE}/api/users/search?email=${encodeURIComponent(email)}`,
+  );
+  if (!response.ok) throw new Error(`Failed to search users: ${response.statusText}`);
+  return response.json();
+}
+
+export async function addCollaborator(
+  docId: string,
+  email: string,
+  role: "editor" | "viewer",
+): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/content/docs/${docId}/collaborators`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, role }),
+  });
+  if (!response.ok) throw new Error(`Failed to add collaborator: ${response.statusText}`);
+}
+
+export async function removeCollaborator(docId: string, userId: string): Promise<void> {
+  const response = await fetch(
+    `${API_BASE}/api/content/docs/${docId}/collaborators/${userId}`,
+    { method: "DELETE" },
+  );
+  if (!response.ok) throw new Error(`Failed to remove collaborator: ${response.statusText}`);
 }

@@ -27,3 +27,29 @@ export interface SessionMessage {
 export interface SessionDetail extends Session {
   messages: SessionMessage[];
 }
+
+export interface Doc {
+  id: string;
+  title: string;
+  updated_at: string;
+  owner_id: string;
+  role: "owner" | "editor" | "viewer";
+}
+
+export interface DocCollaborator {
+  user_id: string;
+  role: "editor" | "viewer";
+  display_name: string | null;
+  email: string | null;
+}
+
+export interface DocDetail extends Doc {
+  content: string;
+  collaborators: DocCollaborator[];
+}
+
+export interface UserSearchResult {
+  user_id: string;
+  display_name: string | null;
+  email: string;
+}
