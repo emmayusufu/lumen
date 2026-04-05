@@ -1,18 +1,20 @@
 "use client";
 
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import Chip from "@mui/material/Chip";
-import TravelExploreIcon from "@mui/icons-material/TravelExplore";
+import Typography from "@mui/material/Typography";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import { signOut } from "next-auth/react";
 import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
   onClear: () => void;
+  onHistoryToggle: () => void;
   activeAgent?: string;
   isLoading?: boolean;
 }
@@ -25,7 +27,7 @@ const AGENT_LABELS: Record<string, string> = {
   writer: "Writing",
 };
 
-export function Header({ onClear, activeAgent, isLoading }: HeaderProps) {
+export function Header({ onClear, onHistoryToggle, activeAgent, isLoading }: HeaderProps) {
   return (
     <Box
       sx={{
@@ -94,12 +96,7 @@ export function Header({ onClear, activeAgent, isLoading }: HeaderProps) {
 
         <Typography
           noWrap
-          sx={{
-            fontWeight: 700,
-            fontSize: "0.82rem",
-            letterSpacing: "-0.01em",
-            color: "text.primary",
-          }}
+          sx={{ fontWeight: 700, fontSize: "0.82rem", letterSpacing: "-0.01em", color: "text.primary" }}
         >
           Research
         </Typography>
@@ -128,23 +125,26 @@ export function Header({ onClear, activeAgent, isLoading }: HeaderProps) {
             width: "1px",
             height: 18,
             bgcolor: (theme) =>
-              theme.palette.mode === "dark"
-                ? "rgba(255,255,255,0.1)"
-                : "rgba(0,0,0,0.1)",
+              theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
             mx: 0.25,
           }}
         />
+
+        <Tooltip title="History" arrow>
+          <IconButton
+            onClick={onHistoryToggle}
+            size="small"
+            sx={{ width: 28, height: 28, color: "text.secondary", "&:hover": { color: "text.primary" } }}
+          >
+            <HistoryRoundedIcon sx={{ fontSize: 15 }} />
+          </IconButton>
+        </Tooltip>
 
         <Tooltip title="Clear chat" arrow>
           <IconButton
             onClick={onClear}
             size="small"
-            sx={{
-              width: 28,
-              height: 28,
-              color: "text.secondary",
-              "&:hover": { color: "error.main" },
-            }}
+            sx={{ width: 28, height: 28, color: "text.secondary", "&:hover": { color: "error.main" } }}
           >
             <DeleteOutlineRoundedIcon sx={{ fontSize: 15 }} />
           </IconButton>
@@ -156,12 +156,7 @@ export function Header({ onClear, activeAgent, isLoading }: HeaderProps) {
           <IconButton
             onClick={() => signOut({ callbackUrl: "/login" })}
             size="small"
-            sx={{
-              width: 28,
-              height: 28,
-              color: "text.secondary",
-              "&:hover": { color: "text.primary" },
-            }}
+            sx={{ width: 28, height: 28, color: "text.secondary", "&:hover": { color: "text.primary" } }}
           >
             <LogoutRoundedIcon sx={{ fontSize: 15 }} />
           </IconButton>

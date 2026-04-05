@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, patch
 
 from fastapi.testclient import TestClient
@@ -20,11 +20,15 @@ def test_list_sessions_requires_auth():
 
 def test_list_sessions_returns_sessions():
     session_id = uuid.uuid4()
-    rows = [{"id": session_id, "title": "Test query", "updated_at": datetime(2026, 4, 7, tzinfo=timezone.utc)}]
+    rows = [
+        {"id": session_id, "title": "Test query", "updated_at": datetime(2026, 4, 7, tzinfo=UTC)}
+    ]
 
     app.dependency_overrides[real_current_user] = make_user
     try:
-        with patch("app.routers.sessions.db.list_sessions", new_callable=AsyncMock, return_value=rows):
+        with patch(
+            "app.routers.sessions.db.list_sessions", new_callable=AsyncMock, return_value=rows
+        ):
             response = TestClient(app).get("/api/sessions")
     finally:
         app.dependency_overrides.pop(real_current_user, None)
@@ -41,7 +45,9 @@ def test_get_session_returns_404_when_missing():
 
     app.dependency_overrides[real_current_user] = make_user
     try:
-        with patch("app.routers.sessions.db.get_session", new_callable=AsyncMock, return_value=None):
+        with patch(
+            "app.routers.sessions.db.get_session", new_callable=AsyncMock, return_value=None
+        ):
             response = TestClient(app).get(f"/api/sessions/{session_id}")
     finally:
         app.dependency_overrides.pop(real_current_user, None)
@@ -51,7 +57,7 @@ def test_get_session_returns_404_when_missing():
 
 def test_get_session_returns_session_with_messages():
     session_id = uuid.uuid4()
-    ts = datetime(2026, 4, 7, tzinfo=timezone.utc)
+    ts = datetime(2026, 4, 7, tzinfo=UTC)
     session_data = {
         "id": session_id,
         "title": "Test",
@@ -61,7 +67,9 @@ def test_get_session_returns_session_with_messages():
 
     app.dependency_overrides[real_current_user] = make_user
     try:
-        with patch("app.routers.sessions.db.get_session", new_callable=AsyncMock, return_value=session_data):
+        with patch(
+            "app.routers.sessions.db.get_session", new_callable=AsyncMock, return_value=session_data
+        ):
             response = TestClient(app).get(f"/api/sessions/{session_id}")
     finally:
         app.dependency_overrides.pop(real_current_user, None)
@@ -78,7 +86,9 @@ def test_delete_session_returns_204():
 
     app.dependency_overrides[real_current_user] = make_user
     try:
-        with patch("app.routers.sessions.db.delete_session", new_callable=AsyncMock, return_value=True):
+        with patch(
+            "app.routers.sessions.db.delete_session", new_callable=AsyncMock, return_value=True
+        ):
             response = TestClient(app).delete(f"/api/sessions/{session_id}")
     finally:
         app.dependency_overrides.pop(real_current_user, None)
@@ -91,7 +101,9 @@ def test_delete_session_returns_404_when_missing():
 
     app.dependency_overrides[real_current_user] = make_user
     try:
-        with patch("app.routers.sessions.db.delete_session", new_callable=AsyncMock, return_value=False):
+        with patch(
+            "app.routers.sessions.db.delete_session", new_callable=AsyncMock, return_value=False
+        ):
             response = TestClient(app).delete(f"/api/sessions/{session_id}")
     finally:
         app.dependency_overrides.pop(real_current_user, None)

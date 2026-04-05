@@ -13,6 +13,18 @@ interface UseSessionsReturn {
 export function useSessions(): UseSessionsReturn {
   const [sessions, setSessions] = useState<Session[]>([]);
 
+  useEffect(() => {
+    const loadSessions = async () => {
+      try {
+        const data = await fetchSessions();
+        setSessions(data);
+      } catch {
+        // non-fatal
+      }
+    };
+    void loadSessions();
+  }, []);
+
   const refresh = useCallback(async () => {
     try {
       const data = await fetchSessions();
@@ -21,10 +33,6 @@ export function useSessions(): UseSessionsReturn {
       // non-fatal
     }
   }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
 
   const removeSession = useCallback(
     async (id: string) => {

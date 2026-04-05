@@ -4,7 +4,6 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from app.db.sessions import (
-    bump_updated_at,
     create_session,
     delete_session,
     get_session,
