@@ -1,20 +1,23 @@
 "use client";
 
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
+import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
-  onClear: () => void;
-  onHistoryToggle: () => void;
+  onClear?: () => void;
+  onHistoryToggle?: () => void;
   activeAgent?: string;
   isLoading?: boolean;
 }
@@ -27,7 +30,7 @@ const AGENT_LABELS: Record<string, string> = {
   writer: "Writing",
 };
 
-export function Header({ onClear, onHistoryToggle, activeAgent, isLoading }: HeaderProps) {
+export function Header({ onClear = () => {}, onHistoryToggle = () => {}, activeAgent, isLoading }: HeaderProps) {
   return (
     <Box
       sx={{
@@ -100,6 +103,16 @@ export function Header({ onClear, onHistoryToggle, activeAgent, isLoading }: Hea
         >
           Research
         </Typography>
+
+        <Button
+          component={Link}
+          href="/docs"
+          startIcon={<ArticleRoundedIcon sx={{ fontSize: 14 }} />}
+          size="small"
+          sx={{ fontSize: "0.72rem", fontWeight: 600, color: "text.secondary", "&:hover": { color: "text.primary" }, minWidth: 0, px: 1 }}
+        >
+          Docs
+        </Button>
 
         {isLoading && activeAgent && (
           <Chip
