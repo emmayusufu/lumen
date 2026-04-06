@@ -190,17 +190,8 @@ export default function LoginPage() {
               transition: "all 0.2s ease",
             }}
           >
-            Sign in with Zitadel
+            Sign In
           </Button>
-
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            textAlign="center"
-            sx={{ mt: 4, fontSize: "0.8rem" }}
-          >
-            Zitadel supports email/password, GitHub and Google — choose at the next screen.
-          </Typography>
 
           <Box
             sx={{
