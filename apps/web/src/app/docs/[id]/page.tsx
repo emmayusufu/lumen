@@ -1,17 +1,22 @@
 "use client";
 
 import { useState, useRef, use } from "react";
+import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
+import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Snackbar from "@mui/material/Snackbar";
 import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ScienceRoundedIcon from "@mui/icons-material/ScienceRounded";
 import { Header } from "@/components/layout/Header";
 import { CollaboratorList } from "@/components/docs/CollaboratorList";
 import { DocEditor } from "@/components/docs/DocEditor";
 import { DocResearchPanel } from "@/components/docs/DocResearchPanel";
 import { useDoc } from "@/hooks/useDoc";
+import { useDocs } from "@/hooks/useDocs";
 import type { DocDetail } from "@/lib/types";
 
 interface Props {
@@ -70,9 +75,19 @@ function DocBody({ doc, saveTitle, saveContent, addCollaborator, removeCollabora
 
 export default function DocPage({ params }: Props) {
   const { id } = use(params);
+  const router = useRouter();
   const { doc, saveTitle, saveContent, addCollaborator, removeCollaborator, saveError, clearSaveError } =
     useDoc(id);
+  const { docs, createDoc } = useDocs();
   const [researchOpen, setResearchOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+
+  const handleCreate = async () => {
+    if (creating) return;
+    setCreating(true);
+    const newId = await createDoc();
+    router.push(`/docs/${newId}`);
+  };
 
   if (!doc)
     return (
@@ -87,14 +102,68 @@ export default function DocPage({ params }: Props) {
     >
       <Header />
       <Box sx={{ height: 56 }} />
-      <DocBody
-        key={doc.id}
-        doc={doc}
-        saveTitle={saveTitle}
-        saveContent={saveContent}
-        addCollaborator={addCollaborator}
-        removeCollaborator={removeCollaborator}
-      />
+      <Box sx={{ flex: 1, display: "flex", overflow: "hidden" }}>
+        <Box
+          sx={{
+            width: 240,
+            flexShrink: 0,
+            borderRight: 1,
+            borderColor: "divider",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
+          <Box
+            sx={{
+              px: 2,
+              py: 1.5,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography variant="body2" fontWeight={600} color="text.secondary">
+              Docs
+            </Typography>
+            <Tooltip title="New doc">
+              <IconButton size="small" onClick={handleCreate} disabled={creating}>
+                <AddRoundedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          <Divider />
+          <Box sx={{ flex: 1, overflow: "auto" }}>
+            {docs.map((d) => (
+              <Box
+                key={d.id}
+                onClick={() => router.push(`/docs/${d.id}`)}
+                sx={{
+                  px: 2,
+                  py: 1,
+                  cursor: "pointer",
+                  bgcolor: d.id === id ? "action.selected" : "transparent",
+                  "&:hover": { bgcolor: d.id === id ? "action.selected" : "action.hover" },
+                  borderLeft: 2,
+                  borderColor: d.id === id ? "primary.main" : "transparent",
+                }}
+              >
+                <Typography variant="body2" noWrap fontWeight={d.id === id ? 600 : 400}>
+                  {d.title || "Untitled"}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+        <DocBody
+          key={doc.id}
+          doc={doc}
+          saveTitle={saveTitle}
+          saveContent={saveContent}
+          addCollaborator={addCollaborator}
+          removeCollaborator={removeCollaborator}
+        />
+      </Box>
       <Tooltip title="Research assistant">
         <IconButton
           onClick={() => setResearchOpen(true)}
