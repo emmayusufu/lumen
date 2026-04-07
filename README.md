@@ -1,6 +1,6 @@
-# Research Assistant
+# Lumen
 
-Multi-agent research assistant with a private docs platform. Ask a technical question and get a cited, well-organised response in ~30 seconds. Write and collaborate on documents with the AI research panel built in.
+AI-powered writing and research tool. Write and collaborate on documents with a built-in research assistant that searches the web, finds sources, and synthesises findings — all without leaving your doc.
 
 ## How It Works
 
