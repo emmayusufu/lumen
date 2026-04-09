@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, createContext, useContext } from "react";
-import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
@@ -21,21 +20,17 @@ export const useThemeContext = () => useContext(ThemeContext);
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(false);
-
   const theme = useMemo(() => (isDark ? darkTheme : lightTheme), [isDark]);
-
   const toggleTheme = () => setIsDark((prev) => !prev);
 
   return (
-    <SessionProvider>
-      <AppRouterCacheProvider options={{ key: "mui" }}>
-        <ThemeContext.Provider value={{ isDark, toggleTheme }}>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            {children}
-          </ThemeProvider>
-        </ThemeContext.Provider>
-      </AppRouterCacheProvider>
-    </SessionProvider>
+    <AppRouterCacheProvider options={{ key: "mui" }}>
+      <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          {children}
+        </ThemeProvider>
+      </ThemeContext.Provider>
+    </AppRouterCacheProvider>
   );
 }

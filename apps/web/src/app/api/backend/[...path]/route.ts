@@ -1,4 +1,3 @@
-import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 
 const BACKEND = process.env.BACKEND_URL ?? "http://localhost:8742";
@@ -7,22 +6,15 @@ async function handler(
   req: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
 ) {
-  const [token, { path }] = await Promise.all([
-    getToken({ req, secret: process.env.NEXTAUTH_SECRET }),
-    params,
-  ]);
-
+  const { path } = await params;
   const target = `${BACKEND}/${path.join("/")}${req.nextUrl.search}`;
 
   const headers = new Headers();
   const contentType = req.headers.get("content-type");
   if (contentType) headers.set("content-type", contentType);
 
-  if (token?.sub) {
-    headers.set("x-user-id", token.sub);
-    headers.set("x-user-email", (token.email as string) ?? "");
-    headers.set("x-user-org", (token.orgId as string) ?? "default");
-  }
+  const cookie = req.headers.get("cookie");
+  if (cookie) headers.set("cookie", cookie);
 
   const body =
     req.method !== "GET" && req.method !== "HEAD"
@@ -35,11 +27,16 @@ async function handler(
     body: body && body.byteLength > 0 ? body : null,
   });
 
+  const responseHeaders = new Headers({
+    "content-type": upstream.headers.get("content-type") ?? "application/json",
+  });
+
+  const setCookie = upstream.headers.get("set-cookie");
+  if (setCookie) responseHeaders.set("set-cookie", setCookie);
+
   return new Response(upstream.body, {
     status: upstream.status,
-    headers: {
-      "content-type": upstream.headers.get("content-type") ?? "application/json",
-    },
+    headers: responseHeaders,
   });
 }
 
