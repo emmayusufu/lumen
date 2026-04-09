@@ -5,9 +5,10 @@ from typing import Any
 
 import jwt
 
+from app.config import TOKEN_TTL_DAYS as _TTL_DAYS
+
 _SECRET = os.environ.get("SECRET_KEY", "dev-secret-change-in-production!")
 _ALGORITHM = "HS256"
-_TTL_DAYS = 7
 
 
 def create_token(user_id: str, email: str, org_id: str, name: str) -> str:

@@ -1,4 +1,3 @@
-import os
 from collections.abc import Callable
 
 import httpx
@@ -6,10 +5,9 @@ import jwt
 from fastapi import HTTPException, Request
 from fastapi.responses import Response
 
+from app.config import OPA_URL
 from app.models.user import User
 from app.utils.token import decode_token
-
-OPA_URL = os.environ.get("OPA_URL", "http://opa:8181")
 
 
 async def attach_user(request: Request, call_next: Callable) -> Response:

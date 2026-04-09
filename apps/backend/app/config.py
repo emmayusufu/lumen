@@ -13,3 +13,6 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+OPA_URL: str = os.environ.get("OPA_URL", "http://opa:8181")
+TOKEN_TTL_DAYS: int = 7
