@@ -2,7 +2,6 @@
 
 import { useRef, useEffect } from "react";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import type { ChatMessage } from "@/lib/types";
 import { MessageBubble } from "./MessageBubble";
@@ -46,14 +45,6 @@ export function MessageList({ messages }: MessageListProps) {
           }}
         >
           <TravelExploreIcon sx={{ fontSize: 32, color: "primary.main", opacity: 0.7 }} />
-        </Box>
-        <Box sx={{ textAlign: "center" }}>
-          <Typography variant="body1" fontWeight={600} sx={{ mb: 0.5 }}>
-            What would you like to research?
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Ask any technical question and I&apos;ll search the web for you.
-          </Typography>
         </Box>
       </Box>
     );
