@@ -7,7 +7,6 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import type { Doc } from "@/lib/types";
@@ -40,21 +39,7 @@ export function DocSidebar({ docs, currentId, creating, onCreate }: Props) {
         height: "100vh",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2, py: 1.5 }}>
-        <Box
-          sx={{
-            width: 22,
-            height: 22,
-            borderRadius: "5px",
-            bgcolor: "primary.main",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <AutoAwesomeIcon sx={{ color: "white", fontSize: 12 }} />
-        </Box>
+      <Box sx={{ px: 2, py: 1.5 }}>
         <Typography fontWeight={700} fontSize="0.875rem" letterSpacing="-0.01em" noWrap>
           Lumen
         </Typography>

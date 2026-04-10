@@ -61,8 +61,8 @@ export const darkTheme = createTheme({
     mode: "dark",
     primary: { main: "#60a5fa", light: "#1e3a8a", dark: "#3b82f6" },
     secondary: { main: "#818cf8" },
-    background: { default: "#0b1120", paper: "#131c31" },
-    text: { primary: "#e2e8f0", secondary: "#94a3b8" },
-    divider: "#1e293b",
+    background: { default: "#191919", paper: "#212121" },
+    text: { primary: "#e2e8f0", secondary: "#9e9e9e" },
+    divider: "#2d2d2d",
   },
 });

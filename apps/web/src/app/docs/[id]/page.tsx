@@ -12,7 +12,6 @@ import { DocEditor } from "@/components/docs/DocEditor";
 import { DocResearchPanel } from "@/components/docs/DocResearchPanel";
 import { DocSidebar } from "@/components/docs/DocSidebar";
 import { ShareButton } from "@/components/docs/ShareButton";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useDoc } from "@/hooks/useDoc";
 import { useDocs } from "@/hooks/useDocs";
 
@@ -24,7 +23,7 @@ export default function DocPage({ params }: Props) {
   const { id } = use(params);
   const router = useRouter();
   const { doc, saveTitle, saveContent, addCollaborator, removeCollaborator, saveError, clearSaveError } = useDoc(id);
-  const { docs, createDoc } = useDocs();
+  const { docs, createDoc, refresh: refreshDocs } = useDocs();
   const [researchOpen, setResearchOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
@@ -80,7 +79,6 @@ export default function DocPage({ params }: Props) {
             onAdd={addCollaborator}
             onRemove={removeCollaborator}
           />
-          <ThemeToggle />
         </Box>
 
         <Box sx={{ flex: 1, overflow: "auto" }}>
@@ -93,7 +91,8 @@ export default function DocPage({ params }: Props) {
               placeholder="Untitled"
               onBlur={() => {
                 const val = titleRef.current?.value ?? "";
-                if (canEdit && val !== doc.title) void saveTitle(val);
+                if (canEdit && val !== doc.title)
+                  void saveTitle(val).then(() => void refreshDocs());
               }}
               sx={{
                 display: "block",
