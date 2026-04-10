@@ -6,9 +6,9 @@ import { BubbleMenu, FloatingMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 import FormatBoldIcon from "@mui/icons-material/FormatBold";
 import FormatItalicIcon from "@mui/icons-material/FormatItalic";
 import FormatStrikethroughIcon from "@mui/icons-material/FormatStrikethrough";
@@ -25,8 +25,10 @@ interface DocEditorProps {
 const editorSx = {
   "& .ProseMirror": {
     outline: "none",
-    minHeight: 400,
+    minHeight: "60vh",
+    fontSize: "1rem",
     lineHeight: 1.75,
+    color: "text.primary",
     "& .is-empty::before": {
       content: "attr(data-placeholder)",
       float: "left",
@@ -34,13 +36,15 @@ const editorSx = {
       pointerEvents: "none",
       height: 0,
     },
-    "& h1": { fontSize: "1.8rem", fontWeight: 700, mt: 2, mb: 0.5 },
-    "& h2": { fontSize: "1.4rem", fontWeight: 700, mt: 2, mb: 0.5 },
-    "& h3": { fontSize: "1.1rem", fontWeight: 700, mt: 1.5, mb: 0.5 },
-    "& pre": { bgcolor: "action.hover", borderRadius: 1, p: 1.5, fontFamily: "monospace", fontSize: "0.875rem", overflowX: "auto", my: 1 },
-    "& code": { fontFamily: "monospace", fontSize: "0.875rem", bgcolor: "action.hover", borderRadius: 0.5, px: 0.5 },
-    "& blockquote": { borderLeft: "3px solid", borderColor: "divider", pl: 2, color: "text.secondary", fontStyle: "italic", my: 1 },
+    "& h1": { fontSize: "1.875rem", fontWeight: 700, letterSpacing: "-0.02em", mt: 3, mb: 0.25 },
+    "& h2": { fontSize: "1.5rem", fontWeight: 600, letterSpacing: "-0.01em", mt: 2.5, mb: 0.25 },
+    "& h3": { fontSize: "1.25rem", fontWeight: 600, mt: 2, mb: 0.25 },
+    "& pre": { bgcolor: "action.hover", borderRadius: "4px", p: 2, fontFamily: "monospace", fontSize: "0.875rem", overflowX: "auto", my: 1 },
+    "& code": { fontFamily: "monospace", fontSize: "0.85em", bgcolor: "action.hover", borderRadius: "3px", px: 0.5 },
+    "& blockquote": { borderLeft: "3px solid", borderColor: "divider", pl: 2, color: "text.secondary", my: 1, ml: 0 },
     "& ul, & ol": { pl: 3 },
+    "& li + li": { mt: 0.25 },
+    "& p": { my: 0.5 },
   },
 };
 
@@ -51,15 +55,15 @@ const FORMATS = [
   { Icon: CodeIcon, mark: "code", fn: (e: Editor) => e.chain().focus().toggleCode().run() },
 ];
 
-const BLOCKS: { label: string; cmd: (e: Editor) => void }[] = [
-  { label: "Text", cmd: (e) => e.chain().focus().setParagraph().run() },
-  { label: "H1", cmd: (e) => e.chain().focus().setHeading({ level: 1 }).run() },
-  { label: "H2", cmd: (e) => e.chain().focus().setHeading({ level: 2 }).run() },
-  { label: "H3", cmd: (e) => e.chain().focus().setHeading({ level: 3 }).run() },
-  { label: "• List", cmd: (e) => e.chain().focus().toggleBulletList().run() },
-  { label: "1. List", cmd: (e) => e.chain().focus().toggleOrderedList().run() },
-  { label: "Code", cmd: (e) => e.chain().focus().toggleCodeBlock().run() },
-  { label: "Quote", cmd: (e) => e.chain().focus().toggleBlockquote().run() },
+const BLOCKS: { label: string; hint: string; cmd: (e: Editor) => void }[] = [
+  { label: "Text", hint: "Plain paragraph", cmd: (e) => e.chain().focus().setParagraph().run() },
+  { label: "Heading 1", hint: "Large title", cmd: (e) => e.chain().focus().setHeading({ level: 1 }).run() },
+  { label: "Heading 2", hint: "Medium title", cmd: (e) => e.chain().focus().setHeading({ level: 2 }).run() },
+  { label: "Heading 3", hint: "Small title", cmd: (e) => e.chain().focus().setHeading({ level: 3 }).run() },
+  { label: "Bullet list", hint: "Unordered list", cmd: (e) => e.chain().focus().toggleBulletList().run() },
+  { label: "Numbered list", hint: "Ordered list", cmd: (e) => e.chain().focus().toggleOrderedList().run() },
+  { label: "Code block", hint: "Monospace code", cmd: (e) => e.chain().focus().toggleCodeBlock().run() },
+  { label: "Quote", hint: "Callout text", cmd: (e) => e.chain().focus().toggleBlockquote().run() },
 ];
 
 export function DocEditor({ content, readOnly, onContentSave, onAskAI }: DocEditorProps) {
@@ -91,15 +95,11 @@ export function DocEditor({ content, readOnly, onContentSave, onAskAI }: DocEdit
   return (
     <Box sx={editorSx}>
       <BubbleMenu editor={editor}>
-        <Paper elevation={3} sx={{ display: "flex", p: 0.5, gap: 0.25, borderRadius: 1.5 }}>
+        <Paper elevation={4} sx={{ display: "flex", p: 0.5, gap: 0.25, borderRadius: "8px", border: 1, borderColor: "divider" }}>
           {FORMATS.map(({ Icon, mark, fn }) => (
-            <IconButton
-              key={mark}
-              size="small"
-              onClick={() => editor && fn(editor)}
-              sx={{ p: 0.5, borderRadius: 1, bgcolor: editor?.isActive(mark) ? "action.selected" : "transparent" }}
-            >
-              <Icon fontSize="small" />
+            <IconButton key={mark} size="small" onClick={() => editor && fn(editor)}
+              sx={{ p: 0.5, borderRadius: "5px", bgcolor: editor?.isActive(mark) ? "action.selected" : "transparent" }}>
+              <Icon sx={{ fontSize: 15 }} />
             </IconButton>
           ))}
         </Paper>
@@ -107,15 +107,24 @@ export function DocEditor({ content, readOnly, onContentSave, onAskAI }: DocEdit
 
       {!readOnly && (
         <FloatingMenu editor={editor}>
-          <Paper elevation={2} sx={{ display: "flex", p: 0.5, gap: 0.5, borderRadius: 1.5, flexWrap: "wrap", maxWidth: 380 }}>
-            {BLOCKS.map(({ label, cmd }) => (
-              <Chip
+          <Paper elevation={4} sx={{ py: 0.75, minWidth: 220, borderRadius: "8px", border: 1, borderColor: "divider" }}>
+            {BLOCKS.map(({ label, hint, cmd }) => (
+              <Box
                 key={label}
-                label={label}
-                size="small"
                 onClick={() => editor && cmd(editor)}
-                sx={{ height: 24, fontSize: "0.72rem", cursor: "pointer" }}
-              />
+                sx={{
+                  px: 2,
+                  py: 0.625,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                  "&:hover": { bgcolor: "action.hover" },
+                }}
+              >
+                <Typography sx={{ fontSize: "0.875rem" }}>{label}</Typography>
+                <Typography variant="caption" color="text.disabled">{hint}</Typography>
+              </Box>
             ))}
           </Paper>
         </FloatingMenu>
