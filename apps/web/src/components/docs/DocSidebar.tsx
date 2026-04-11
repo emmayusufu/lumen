@@ -33,7 +33,7 @@ export function DocSidebar({ docs, currentId, creating, onCreate }: Props) {
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
-        bgcolor: (t) => t.palette.mode === "dark" ? "#1c1c1c" : "#F3F2EF",
+        bgcolor: (t) => t.palette.mode === "dark" ? "#1c1c1c" : "#EDEEE8",
         borderRight: "1px solid",
         borderColor: "divider",
         height: "100vh",

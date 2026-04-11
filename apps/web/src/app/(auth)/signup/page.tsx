@@ -147,9 +147,9 @@ export default function SignupPage() {
               fontSize: "0.95rem",
               fontWeight: 700,
               borderRadius: "14px",
-              boxShadow: "0 4px 20px rgba(30,58,138,0.3)",
+              boxShadow: "0 4px 20px rgba(163,176,135,0.3)",
               "&:hover:not(:disabled)": {
-                boxShadow: "0 6px 24px rgba(30,58,138,0.4)",
+                boxShadow: "0 6px 24px rgba(163,176,135,0.4)",
                 transform: "translateY(-1px)",
               },
               transition: "all 0.2s ease",

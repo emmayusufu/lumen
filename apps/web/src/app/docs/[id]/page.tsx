@@ -111,7 +111,7 @@ export default function DocPage({ params }: Props) {
             background: (t) =>
               t.palette.mode === "dark"
                 ? "#212121"
-                : "linear-gradient(180deg, #f5f6ff 0%, #ffffff 80px)",
+                : "linear-gradient(180deg, #EEF0E9 0%, #ffffff 90px)",
           }}
         >
           <Box sx={{ maxWidth: 720, mx: "auto", px: { xs: 3, md: 8 }, pt: 12, pb: 24 }}>
