@@ -6,40 +6,281 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern", "liga", "calt";
 }
 
-::-webkit-scrollbar {
-  width: 5px;
+/* Selection color — olive tint */
+::selection {
+  background: rgba(139, 155, 110, 0.22);
+  color: inherit;
+}
+.dark ::selection {
+  background: rgba(186, 200, 160, 0.26);
 }
 
-::-webkit-scrollbar-track {
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
   background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.2);
   border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.3s ease;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.4);
+*:hover::-webkit-scrollbar-thumb,
+*:focus::-webkit-scrollbar-thumb,
+*:focus-within::-webkit-scrollbar-thumb {
+  background: rgba(107, 99, 88, 0.28);
+  background-clip: padding-box;
+}
+*:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 99, 88, 0.45);
+  background-clip: padding-box;
+}
+.dark *:hover::-webkit-scrollbar-thumb,
+.dark *:focus::-webkit-scrollbar-thumb,
+.dark *:focus-within::-webkit-scrollbar-thumb {
+  background: rgba(235, 230, 217, 0.16);
+  background-clip: padding-box;
+}
+.dark *:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(235, 230, 217, 0.3);
+  background-clip: padding-box;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+*:hover {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(107, 99, 88, 0.28) transparent;
+}
+.dark *:hover {
+  scrollbar-color: rgba(235, 230, 217, 0.16) transparent;
+}
+
+/* Page-load stagger */
+@keyframes lumenRise {
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
+}
+@keyframes lumenFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes lumenDrawLine {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes lumenPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.lumen-rise {
+  opacity: 0;
+  animation: lumenRise 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+.lumen-fade {
+  opacity: 0;
+  animation: lumenFade 0.9s ease-out forwards;
+}
+.lumen-draw-line {
+  transform-origin: left center;
+  animation: lumenDrawLine 0.9s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+.lumen-pulse {
+  animation: lumenPulse 2.4s ease-in-out infinite;
+}
+
+/* Paper texture — subtle warmth */
+.lumen-paper {
+  background-image:
+    radial-gradient(ellipse 800px 600px at 20% 10%, rgba(139, 155, 110, 0.035), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 80% 90%, rgba(184, 128, 74, 0.025), transparent 60%);
+  background-attachment: fixed;
+}
+.dark .lumen-paper {
+  background-image:
+    radial-gradient(ellipse 800px 600px at 20% 10%, rgba(186, 200, 160, 0.04), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 80% 90%, rgba(212, 165, 116, 0.03), transparent 60%);
+}
+
+/* Decorative hairline ornament */
+.lumen-ornament {
+  display: inline-block;
+  width: 36px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.4;
+  vertical-align: middle;
+  margin: 0 14px;
 }
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
-
 @keyframes dotPulse {
   0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
   40% { opacity: 1; transform: scale(1); }
 }
 
-.fade-in {
-  animation: fadeIn 0.35s ease-out forwards;
+.lumen-codeblock {
+  position: relative;
+  background: #F6F8FA;
+  color: #1F2328;
+  border-radius: 8px;
+  border: 1px solid #D0D7DE;
+  margin: 1.5em 0;
+  overflow: hidden;
+  font-family: "SF Mono", "JetBrains Mono", "Fira Code", "Menlo", monospace;
+}
+.dark .lumen-codeblock {
+  background: #0D1117;
+  color: #E6EDF3;
+  border-color: #30363D;
+}
+.lumen-codeblock pre {
+  margin: 0;
+  padding: 14px 18px;
+  overflow-x: auto;
+  font-size: 0.86rem;
+  line-height: 1.65;
+  font-family: inherit;
+  background: transparent;
+}
+.lumen-codeblock pre code {
+  background: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  border: none !important;
+  font-family: inherit;
+}
+
+.hljs-comment,
+.hljs-quote { color: #6A737D; font-style: italic; }
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal { color: #D73A49; }
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attribute,
+.hljs-tag,
+.hljs-name,
+.hljs-regexp,
+.hljs-link,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-selector-pseudo { color: #22863A; }
+.hljs-number,
+.hljs-meta,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params { color: #005CC5; }
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet { color: #032F62; }
+.hljs-title,
+.hljs-section { color: #6F42C1; font-weight: 600; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 700; }
+.hljs-doctag,
+.hljs-deletion { color: #B31D28; background-color: #FFEEF0; }
+.hljs-addition { color: #22863A; background-color: #F0FFF4; }
+
+.dark .hljs-comment,
+.dark .hljs-quote { color: #8B949E; font-style: italic; }
+.dark .hljs-keyword,
+.dark .hljs-selector-tag,
+.dark .hljs-literal { color: #FF7B72; }
+.dark .hljs-variable,
+.dark .hljs-template-variable,
+.dark .hljs-attribute,
+.dark .hljs-tag,
+.dark .hljs-name,
+.dark .hljs-regexp,
+.dark .hljs-link,
+.dark .hljs-selector-attr,
+.dark .hljs-selector-class,
+.dark .hljs-selector-id,
+.dark .hljs-selector-pseudo { color: #7EE787; }
+.dark .hljs-number,
+.dark .hljs-meta,
+.dark .hljs-built_in,
+.dark .hljs-builtin-name,
+.dark .hljs-type,
+.dark .hljs-params { color: #79C0FF; }
+.dark .hljs-string,
+.dark .hljs-symbol,
+.dark .hljs-bullet { color: #A5D6FF; }
+.dark .hljs-title,
+.dark .hljs-section { color: #D2A8FF; font-weight: 600; }
+.dark .hljs-doctag,
+.dark .hljs-deletion { color: #FFDCD7; background-color: rgba(248, 81, 73, 0.15); }
+.dark .hljs-addition { color: #AFF5B4; background-color: rgba(46, 160, 67, 0.15); }
+
+.ProseMirror p code,
+.ProseMirror li code,
+.ProseMirror h1 code,
+.ProseMirror h2 code,
+.ProseMirror h3 code {
+  background: rgba(139, 155, 110, 0.12);
+  color: #5E6B47;
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  font-family: "SF Mono", "JetBrains Mono", "Fira Code", "Menlo", monospace;
+  font-size: 0.86em;
+  font-weight: 500;
+}
+.dark .ProseMirror p code,
+.dark .ProseMirror li code,
+.dark .ProseMirror h1 code,
+.dark .ProseMirror h2 code,
+.dark .ProseMirror h3 code {
+  background: rgba(186, 200, 160, 0.14);
+  color: #BAC8A0;
+}
+
+/* Kill browser autofill highlight */
+@keyframes autofillLight {
+  from { background-color: #FAF8F3; }
+  to { background-color: #FAF8F3; }
+}
+@keyframes autofillDark {
+  from { background-color: #1D1B15; }
+  to { background-color: #1D1B15; }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  animation-name: autofillLight !important;
+  animation-fill-mode: both !important;
+  -webkit-box-shadow: 0 0 0 1000px #FAF8F3 inset !important;
+  box-shadow: 0 0 0 1000px #FAF8F3 inset !important;
+  -webkit-text-fill-color: #2A2520 !important;
+  caret-color: #2A2520 !important;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  animation-name: autofillDark !important;
+  animation-fill-mode: both !important;
+  -webkit-box-shadow: 0 0 0 1000px #1D1B15 inset !important;
+  box-shadow: 0 0 0 1000px #1D1B15 inset !important;
+  -webkit-text-fill-color: #EBE6D9 !important;
+  caret-color: #EBE6D9 !important;
 }

@@ -77,7 +77,7 @@ export default function LoginPage() {
             fontWeight: 900,
             lineHeight: 1,
             letterSpacing: "-0.05em",
-            color: (t) => t.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.06)",
+            color: "rgba(0,0,0,0.06)",
             userSelect: "none",
             pointerEvents: "none",
           }}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import { Providers } from "./providers";
+import "./globals.css";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -11,7 +12,7 @@ const nunito = Nunito({
 
 export const metadata: Metadata = {
   title: "Lumen",
-  description: "AI-powered writing and research",
+  description: "A quiet workspace for thinking and writing well",
 };
 
 export default function RootLayout({
@@ -21,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={nunito.variable}>
+      <body className={nunito.variable} suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>

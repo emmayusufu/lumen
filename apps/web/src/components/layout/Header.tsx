@@ -51,7 +51,7 @@ export function Header({ onClear = () => {}, onHistoryToggle = () => {}, activeA
       }}
     >
       <Box
-        sx={{
+        sx={(theme) => ({
           display: "inline-flex",
           alignItems: "center",
           gap: 0.75,
@@ -61,20 +61,16 @@ export function Header({ onClear = () => {}, onHistoryToggle = () => {}, activeA
           borderRadius: "22px",
           pointerEvents: "auto",
           border: 1,
-          borderColor: (theme) =>
-            theme.palette.mode === "dark"
-              ? "rgba(255,255,255,0.08)"
-              : "rgba(0,0,0,0.08)",
-          bgcolor: (theme) =>
-            theme.palette.mode === "dark"
-              ? "rgba(19, 28, 49, 0.92)"
-              : "rgba(255, 255, 255, 0.92)",
+          borderColor: "rgba(0,0,0,0.08)",
+          bgcolor: "rgba(255, 255, 255, 0.92)",
           backdropFilter: "blur(24px) saturate(180%)",
-          boxShadow: (theme) =>
-            theme.palette.mode === "dark"
-              ? "0 4px 24px rgba(0,0,0,0.5)"
-              : "0 4px 24px rgba(0,0,0,0.08)",
-        }}
+          boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+          ...theme.applyStyles("dark", {
+            borderColor: "rgba(255,255,255,0.08)",
+            backgroundColor: "rgba(19, 28, 49, 0.92)",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+          }),
+        })}
       >
         <Box
           sx={{
@@ -122,29 +118,31 @@ export function Header({ onClear = () => {}, onHistoryToggle = () => {}, activeA
           <Chip
             label={AGENT_LABELS[activeAgent] || activeAgent}
             size="small"
-            sx={{
+            sx={(theme) => ({
               height: 22,
               fontSize: "0.65rem",
               fontWeight: 700,
               letterSpacing: "0.02em",
-              bgcolor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(45,212,191,0.15)"
-                  : "rgba(13,148,136,0.1)",
+              bgcolor: "rgba(13,148,136,0.1)",
               color: "primary.main",
               "& .MuiChip-label": { px: 1 },
-            }}
+              ...theme.applyStyles("dark", {
+                backgroundColor: "rgba(45,212,191,0.15)",
+              }),
+            })}
           />
         )}
 
         <Box
-          sx={{
+          sx={(theme) => ({
             width: "1px",
             height: 18,
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+            bgcolor: "rgba(0,0,0,0.1)",
             mx: 0.25,
-          }}
+            ...theme.applyStyles("dark", {
+              backgroundColor: "rgba(255,255,255,0.1)",
+            }),
+          })}
         />
 
         <Tooltip title="History" arrow>

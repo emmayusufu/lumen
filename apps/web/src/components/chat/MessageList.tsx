@@ -31,18 +31,18 @@ export function MessageList({ messages }: MessageListProps) {
         }}
       >
         <Box
-          sx={{
+          sx={(theme) => ({
             width: 64,
             height: 64,
             borderRadius: 3,
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark"
-                ? "rgba(45, 212, 191, 0.08)"
-                : "rgba(13, 148, 136, 0.06)",
+            backgroundColor: "rgba(139, 155, 110, 0.1)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-          }}
+            ...theme.applyStyles("dark", {
+              backgroundColor: "rgba(186, 200, 160, 0.1)",
+            }),
+          })}
         >
           <TravelExploreIcon sx={{ fontSize: 32, color: "primary.main", opacity: 0.7 }} />
         </Box>

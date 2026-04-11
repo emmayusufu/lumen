@@ -45,34 +45,27 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const canSend = value.trim().length > 0 && !disabled;
 
   return (
-    <Box
-      sx={{
-        px: { xs: 1.5, sm: 3, md: 0 },
-        pb: { xs: 1.5, md: 2 },
-        pt: 0.5,
-      }}
-    >
+    <Box>
       <Box
-        sx={{
+        sx={(theme) => ({
           maxWidth: 700,
           mx: "auto",
-          borderRadius: "22px",
-          bgcolor: "background.paper",
-          border: 2,
+          borderRadius: "12px",
+          backgroundColor: "#FAF8F3",
+          border: "1.5px solid",
           borderColor: focused ? "primary.main" : "divider",
-          boxShadow: (theme) => {
-            if (focused) {
-              return theme.palette.mode === "dark"
-                ? "0 0 0 4px rgba(45,212,191,0.1), 0 8px 32px rgba(0,0,0,0.4)"
-                : "0 0 0 4px rgba(13,148,136,0.08), 0 8px 32px rgba(0,0,0,0.08)";
-            }
-            return theme.palette.mode === "dark"
-              ? "0 4px 24px rgba(0,0,0,0.3)"
-              : "0 4px 24px rgba(0,0,0,0.05)";
-          },
-          transition: "border-color 0.25s ease, box-shadow 0.25s ease",
+          boxShadow: focused
+            ? "0 0 0 3px rgba(139, 155, 110, 0.12), 0 4px 16px rgba(0,0,0,0.04)"
+            : "0 1px 3px rgba(0,0,0,0.03)",
+          transition: "all 0.22s cubic-bezier(0.2, 0.7, 0.3, 1)",
           overflow: "hidden",
-        }}
+          ...theme.applyStyles("dark", {
+            backgroundColor: "rgba(255,255,255,0.04)",
+            boxShadow: focused
+              ? "0 0 0 3px rgba(186, 200, 160, 0.16), 0 4px 16px rgba(0,0,0,0.4)"
+              : "0 1px 3px rgba(0,0,0,0.2)",
+          }),
+        })}
       >
         <Box
           sx={{

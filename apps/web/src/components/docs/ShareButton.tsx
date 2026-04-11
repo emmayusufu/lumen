@@ -45,18 +45,18 @@ export function ShareButton({ collaborators, isOwner, onAdd, onRemove }: Props) 
         transformOrigin={{ vertical: "top", horizontal: "right" }}
         slotProps={{
           paper: {
-            sx: {
+            sx: (theme) => ({
               mt: 0.75,
               p: 2,
               width: 360,
               borderRadius: "10px",
               border: "1px solid",
               borderColor: "divider",
-              boxShadow: (t) =>
-                t.palette.mode === "dark"
-                  ? "0 8px 32px rgba(0,0,0,0.5)"
-                  : "0 8px 32px rgba(0,0,0,0.1)",
-            },
+              boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+              ...theme.applyStyles("dark", {
+                boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+              }),
+            }),
           },
         }}
       >
