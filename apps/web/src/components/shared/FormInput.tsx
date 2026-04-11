@@ -10,13 +10,13 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import type { TextFieldProps } from "@mui/material/TextField";
 
-type Props = Omit<TextFieldProps, "label" | "variant"> & {
+type Props = Omit<TextFieldProps, "label" | "variant" | "sx"> & {
   label?: string;
   required?: boolean;
   errorText?: string;
 };
 
-export function FormInput({ label, required, type, error, errorText, helperText, slotProps, sx, ...rest }: Props) {
+export function FormInput({ label, required, type, error, errorText, helperText, slotProps, ...rest }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
 
@@ -54,38 +54,10 @@ export function FormInput({ label, required, type, error, errorText, helperText,
             ...(slotProps as { input?: object })?.input,
             ...passwordAdornment,
           },
-        }}
-        sx={{
-          "& .MuiOutlinedInput-root": {
-            height: 43,
-            borderRadius: "10px",
-            fontSize: "0.875rem",
-            bgcolor: (t) => t.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "#fafafa",
-            transition: "all 0.2s ease",
-            "& fieldset": {
-              borderColor: error ? "error.main" : "divider",
-              borderWidth: "1.5px",
-            },
-            "&:hover fieldset": {
-              borderColor: error ? "error.main" : "primary.main",
-              borderWidth: "1.5px",
-            },
-            "&.Mui-focused": {
-              bgcolor: "background.paper",
-            },
-            "&.Mui-focused fieldset": {
-              borderColor: error ? "error.main" : "primary.main",
-              borderWidth: "2px",
-            },
+          htmlInput: {
+            ...(slotProps as { htmlInput?: object })?.htmlInput,
+            suppressHydrationWarning: true,
           },
-          "& .MuiInputBase-input": {
-            padding: "0 14px",
-            fontSize: "0.875rem",
-            "&::placeholder": {
-              opacity: 1,
-            },
-          },
-          ...sx,
         }}
       />
       {(errorText || helperText) && (
