@@ -1,8 +1,8 @@
 "use client";
 
-import { createTheme } from "@mui/material/styles";
+import { extendTheme } from "@mui/material/styles";
 
-const shared = {
+export const theme = extendTheme({
   typography: {
     fontFamily: "var(--font-nunito), 'Nunito', sans-serif",
     h5: { fontWeight: 700, letterSpacing: "-0.02em" },
@@ -41,28 +41,28 @@ const shared = {
       },
     },
   },
-};
-
-export const lightTheme = createTheme({
-  ...shared,
-  palette: {
-    mode: "light",
-    primary: { main: "#A3B087", light: "#D5DDBF", dark: "#78895B" },
-    secondary: { main: "#C09060" },
-    background: { default: "#F5F6F1", paper: "#ffffff" },
-    text: { primary: "#1C1F17", secondary: "#626855" },
-    divider: "#DDE0D6",
+  colorSchemes: {
+    light: {
+      palette: {
+        primary: { main: "#A3B087", light: "#D5DDBF", dark: "#78895B" },
+        secondary: { main: "#C09060" },
+        background: { default: "#F5F6F1", paper: "#ffffff" },
+        text: { primary: "#1C1F17", secondary: "#626855" },
+        divider: "#DDE0D6",
+      },
+    },
+    dark: {
+      palette: {
+        primary: { main: "#BAC8A0", light: "#384230", dark: "#A3B087" },
+        secondary: { main: "#D4A574" },
+        background: { default: "#191919", paper: "#212121" },
+        text: { primary: "#E8EBE0", secondary: "#9EA891" },
+        divider: "#2d2d2d",
+      },
+    },
   },
 });
 
-export const darkTheme = createTheme({
-  ...shared,
-  palette: {
-    mode: "dark",
-    primary: { main: "#BAC8A0", light: "#384230", dark: "#A3B087" },
-    secondary: { main: "#D4A574" },
-    background: { default: "#191919", paper: "#212121" },
-    text: { primary: "#E8EBE0", secondary: "#9EA891" },
-    divider: "#2d2d2d",
-  },
-});
+// Keep these exports so any remaining imports don't break
+export const lightTheme = theme;
+export const darkTheme = theme;

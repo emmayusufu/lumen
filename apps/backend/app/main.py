@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
     await close_pool()
 
 
-app = FastAPI(title="Research Assistant", lifespan=lifespan)
+app = FastAPI(title="Lumen", lifespan=lifespan)
 
 app.middleware("http")(attach_user)
 

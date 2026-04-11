@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo, createContext, useContext } from "react";
-import { ThemeProvider } from "@mui/material/styles";
+import { createContext, useContext } from "react";
+import { CssVarsProvider, useColorScheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
-import { lightTheme, darkTheme } from "@/theme";
+import { theme } from "@/theme";
 
 interface ThemeContextType {
   isDark: boolean;
@@ -18,19 +18,27 @@ const ThemeContext = createContext<ThemeContextType>({
 
 export const useThemeContext = () => useContext(ThemeContext);
 
-export function Providers({ children }: { children: React.ReactNode }) {
-  const [isDark, setIsDark] = useState(false);
-  const theme = useMemo(() => (isDark ? darkTheme : lightTheme), [isDark]);
-  const toggleTheme = () => setIsDark((prev) => !prev);
+function ThemeContextBridge({ children }: { children: React.ReactNode }) {
+  const { mode, setMode } = useColorScheme();
+  const isDark = mode === "dark";
+  const toggleTheme = () => setMode(isDark ? "light" : "dark");
 
   return (
+    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
     <AppRouterCacheProvider options={{ key: "mui" }}>
-      <ThemeContext.Provider value={{ isDark, toggleTheme }}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
+      <CssVarsProvider theme={theme} defaultMode="light">
+        <CssBaseline />
+        <ThemeContextBridge>
           {children}
-        </ThemeProvider>
-      </ThemeContext.Provider>
+        </ThemeContextBridge>
+      </CssVarsProvider>
     </AppRouterCacheProvider>
   );
 }
