@@ -27,6 +27,15 @@ interface DocEditorProps {
   onAskAI?: () => void;
 }
 
+// Delete the '/' that triggered the menu, then apply the block type
+const withSlashDelete = (fn: (e: Editor) => void) => (e: Editor) => {
+  const { $anchor } = e.state.selection;
+  if ($anchor.parent.textContent === "/") {
+    e.chain().deleteRange({ from: $anchor.pos - 1, to: $anchor.pos }).run();
+  }
+  fn(e);
+};
+
 const editorSx = {
   "& .ProseMirror": {
     outline: "none",
@@ -88,28 +97,31 @@ const FORMATS = [
   { Icon: CodeRoundedIcon, mark: "code", fn: (e: Editor) => e.chain().focus().toggleCode().run() },
 ];
 
-const BLOCK_GROUPS: { label: string; items: { label: string; hint: string; Icon: React.ElementType; cmd: (e: Editor) => void }[] }[] = [
+const BLOCK_GROUPS: {
+  label: string;
+  items: { label: string; hint: string; Icon: React.ElementType; cmd: (e: Editor) => void }[];
+}[] = [
   {
     label: "Text",
     items: [
-      { label: "Text", hint: "Plain paragraph", Icon: NotesRoundedIcon, cmd: (e) => e.chain().focus().setParagraph().run() },
-      { label: "Heading 1", hint: "Big title", Icon: () => <Typography sx={{ fontSize: "0.7rem", fontWeight: 800, lineHeight: 1, color: "text.secondary", minWidth: 14 }}>H1</Typography>, cmd: (e) => e.chain().focus().setHeading({ level: 1 }).run() },
-      { label: "Heading 2", hint: "Section title", Icon: () => <Typography sx={{ fontSize: "0.7rem", fontWeight: 800, lineHeight: 1, color: "text.secondary", minWidth: 14 }}>H2</Typography>, cmd: (e) => e.chain().focus().setHeading({ level: 2 }).run() },
-      { label: "Heading 3", hint: "Sub-section", Icon: () => <Typography sx={{ fontSize: "0.7rem", fontWeight: 800, lineHeight: 1, color: "text.secondary", minWidth: 14 }}>H3</Typography>, cmd: (e) => e.chain().focus().setHeading({ level: 3 }).run() },
+      { label: "Text", hint: "Plain paragraph", Icon: NotesRoundedIcon, cmd: withSlashDelete((e) => e.chain().focus().setParagraph().run()) },
+      { label: "Heading 1", hint: "Big title", Icon: () => <Typography sx={{ fontSize: "0.7rem", fontWeight: 800, lineHeight: 1, color: "text.secondary", minWidth: 14 }}>H1</Typography>, cmd: withSlashDelete((e) => e.chain().focus().setHeading({ level: 1 }).run()) },
+      { label: "Heading 2", hint: "Section title", Icon: () => <Typography sx={{ fontSize: "0.7rem", fontWeight: 800, lineHeight: 1, color: "text.secondary", minWidth: 14 }}>H2</Typography>, cmd: withSlashDelete((e) => e.chain().focus().setHeading({ level: 2 }).run()) },
+      { label: "Heading 3", hint: "Sub-section", Icon: () => <Typography sx={{ fontSize: "0.7rem", fontWeight: 800, lineHeight: 1, color: "text.secondary", minWidth: 14 }}>H3</Typography>, cmd: withSlashDelete((e) => e.chain().focus().setHeading({ level: 3 }).run()) },
     ],
   },
   {
     label: "List",
     items: [
-      { label: "Bullet list", hint: "Unordered", Icon: FormatListBulletedRoundedIcon, cmd: (e) => e.chain().focus().toggleBulletList().run() },
-      { label: "Numbered list", hint: "Ordered", Icon: FormatListNumberedRoundedIcon, cmd: (e) => e.chain().focus().toggleOrderedList().run() },
+      { label: "Bullet list", hint: "Unordered", Icon: FormatListBulletedRoundedIcon, cmd: withSlashDelete((e) => e.chain().focus().toggleBulletList().run()) },
+      { label: "Numbered list", hint: "Ordered", Icon: FormatListNumberedRoundedIcon, cmd: withSlashDelete((e) => e.chain().focus().toggleOrderedList().run()) },
     ],
   },
   {
     label: "Other",
     items: [
-      { label: "Code block", hint: "Monospace", Icon: CodeRoundedIcon, cmd: (e) => e.chain().focus().toggleCodeBlock().run() },
-      { label: "Quote", hint: "Callout", Icon: FormatQuoteRoundedIcon, cmd: (e) => e.chain().focus().toggleBlockquote().run() },
+      { label: "Code block", hint: "Monospace", Icon: CodeRoundedIcon, cmd: withSlashDelete((e) => e.chain().focus().toggleCodeBlock().run()) },
+      { label: "Quote", hint: "Callout", Icon: FormatQuoteRoundedIcon, cmd: withSlashDelete((e) => e.chain().focus().toggleBlockquote().run()) },
     ],
   },
 ];
@@ -118,7 +130,7 @@ export function DocEditor({ content, readOnly, onContentSave, onAskAI }: DocEdit
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Placeholder.configure({ placeholder: "Write something, or '/' for commands…", showOnlyCurrent: true }),
+      Placeholder.configure({ placeholder: "Start writing, or type '/' for commands…", showOnlyCurrent: true }),
     ],
     content,
     editable: !readOnly,
@@ -142,8 +154,8 @@ export function DocEditor({ content, readOnly, onContentSave, onAskAI }: DocEdit
 
   return (
     <Box sx={editorSx}>
-      {/* Glassmorphic bubble menu */}
-      <BubbleMenu editor={editor ?? undefined}>
+      {/* Glassmorphic bubble menu — only mount once editor is ready */}
+      {editor !== null && <BubbleMenu editor={editor}>
         <Paper
           elevation={0}
           sx={{
@@ -172,7 +184,7 @@ export function DocEditor({ content, readOnly, onContentSave, onAskAI }: DocEdit
                 borderRadius: "6px",
                 color: editor?.isActive(mark) ? "primary.main" : "text.secondary",
                 bgcolor: editor?.isActive(mark)
-                  ? (t) => t.palette.mode === "dark" ? "rgba(96,165,250,0.15)" : "rgba(30,58,138,0.08)"
+                  ? (t) => t.palette.mode === "dark" ? "rgba(186,200,160,0.15)" : "rgba(163,176,135,0.12)"
                   : "transparent",
                 "&:hover": { bgcolor: "action.hover" },
                 transition: "all 0.1s ease",
@@ -182,11 +194,19 @@ export function DocEditor({ content, readOnly, onContentSave, onAskAI }: DocEdit
             </IconButton>
           ))}
         </Paper>
-      </BubbleMenu>
+      </BubbleMenu>}
 
-      {/* Floating block menu */}
-      {!readOnly && (
-        <FloatingMenu editor={editor}>
+      {/* Slash-command menu — only mount once editor is ready, only shows on '/' */}
+      {!readOnly && editor !== null && (
+        <FloatingMenu
+          editor={editor}
+          shouldShow={({ state }) => {
+            const { $anchor, empty } = state.selection;
+            if (!empty) return false;
+            const isTextblock = $anchor.parent.isTextblock && !$anchor.parent.type.spec.code;
+            return isTextblock && $anchor.parent.textContent === "/";
+          }}
+        >
           <Paper
             elevation={0}
             sx={{

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, use } from "react";
+import { useState, useRef, use, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -27,7 +27,10 @@ export default function DocPage({ params }: Props) {
   const { docs, createDoc, refresh: refreshDocs } = useDocs();
   const [researchOpen, setResearchOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const handleCreate = async () => {
     if (creating) return;
@@ -37,11 +40,11 @@ export default function DocPage({ params }: Props) {
     router.push(`/docs/${newId}`);
   };
 
-  if (!doc) return (
+  if (!doc) return mounted ? (
     <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
       <CircularProgress size={24} thickness={2} />
     </Box>
-  );
+  ) : null;
 
   const canEdit = doc.role === "owner" || doc.role === "editor";
 
@@ -108,10 +111,7 @@ export default function DocPage({ params }: Props) {
           sx={{
             flex: 1,
             overflow: "auto",
-            background: (t) =>
-              t.palette.mode === "dark"
-                ? "#212121"
-                : "linear-gradient(180deg, #EEF0E9 0%, #ffffff 90px)",
+            bgcolor: "background.paper",
           }}
         >
           <Box sx={{ maxWidth: 720, mx: "auto", px: { xs: 3, md: 8 }, pt: 12, pb: 24 }}>

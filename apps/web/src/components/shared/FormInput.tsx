@@ -8,48 +8,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { styled } from "@mui/material/styles";
 import type { TextFieldProps } from "@mui/material/TextField";
-
-const StyledField = styled(TextField)<{ error?: boolean }>(({ theme, error }) => ({
-  "& .MuiOutlinedInput-root": {
-    height: 43,
-    borderRadius: 10,
-    fontSize: "0.875rem",
-    backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "#fafafa",
-    transition: "all 0.2s ease",
-    "& fieldset": {
-      borderColor: error ? theme.palette.error.main : theme.palette.divider,
-      borderWidth: 1.5,
-    },
-    "&:hover fieldset": {
-      borderColor: error ? theme.palette.error.main : theme.palette.primary.main,
-      borderWidth: 1.5,
-    },
-    "&.Mui-focused": {
-      backgroundColor: theme.palette.background.paper,
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: error ? theme.palette.error.main : theme.palette.primary.main,
-      borderWidth: 2,
-    },
-    "&.Mui-disabled fieldset": {
-      borderColor: theme.palette.divider,
-    },
-  },
-  "& .MuiInputBase-input": {
-    padding: "0 14px",
-    fontSize: "0.875rem",
-    "&::placeholder": {
-      color: theme.palette.text.disabled,
-      opacity: 1,
-    },
-    "& :-webkit-autofill": {
-      WebkitBoxShadow: "0 0 0 1000px transparent inset",
-      transition: "background-color 5000s ease-in-out 0s",
-    },
-  },
-}));
 
 type Props = Omit<TextFieldProps, "label" | "variant"> & {
   label?: string;
@@ -57,7 +16,7 @@ type Props = Omit<TextFieldProps, "label" | "variant"> & {
   errorText?: string;
 };
 
-export function FormInput({ label, required, type, error, errorText, helperText, slotProps, ...rest }: Props) {
+export function FormInput({ label, required, type, error, errorText, helperText, slotProps, sx, ...rest }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
 
@@ -83,7 +42,7 @@ export function FormInput({ label, required, type, error, errorText, helperText,
           {required && <Typography fontSize="0.75rem" color="error">*</Typography>}
         </Box>
       )}
-      <StyledField
+      <TextField
         {...rest}
         type={isPassword ? (showPassword ? "text" : "password") : type}
         variant="outlined"
@@ -95,6 +54,38 @@ export function FormInput({ label, required, type, error, errorText, helperText,
             ...(slotProps as { input?: object })?.input,
             ...passwordAdornment,
           },
+        }}
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            height: 43,
+            borderRadius: "10px",
+            fontSize: "0.875rem",
+            bgcolor: (t) => t.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "#fafafa",
+            transition: "all 0.2s ease",
+            "& fieldset": {
+              borderColor: error ? "error.main" : "divider",
+              borderWidth: "1.5px",
+            },
+            "&:hover fieldset": {
+              borderColor: error ? "error.main" : "primary.main",
+              borderWidth: "1.5px",
+            },
+            "&.Mui-focused": {
+              bgcolor: "background.paper",
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: error ? "error.main" : "primary.main",
+              borderWidth: "2px",
+            },
+          },
+          "& .MuiInputBase-input": {
+            padding: "0 14px",
+            fontSize: "0.875rem",
+            "&::placeholder": {
+              opacity: 1,
+            },
+          },
+          ...sx,
         }}
       />
       {(errorText || helperText) && (
