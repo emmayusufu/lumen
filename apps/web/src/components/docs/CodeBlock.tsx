@@ -62,7 +62,7 @@ export function CodeBlock({ node, updateAttributes, extension }: NodeViewProps) 
   const [copied, setCopied] = useState(false);
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const [query, setQuery] = useState("");
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
 
   const lowlight = extension.options.lowlight;
   const supported: string[] = (lowlight?.listLanguages?.() ?? []) as string[];
@@ -93,7 +93,7 @@ export function CodeBlock({ node, updateAttributes, extension }: NodeViewProps) 
 
   const handleOpen = () => {
     setQuery("");
-    setAnchor(triggerRef.current);
+    setAnchor(barRef.current);
   };
 
   const handlePick = (lang: string | null) => {
@@ -114,74 +114,80 @@ export function CodeBlock({ node, updateAttributes, extension }: NodeViewProps) 
   return (
     <NodeViewWrapper as="div" className="lumen-codeblock">
       <Box
+        ref={barRef}
         contentEditable={false}
         suppressContentEditableWarning
         sx={(theme) => ({
+          position: "absolute",
+          top: 8,
+          right: 8,
+          zIndex: 2,
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          pl: 1.25,
-          pr: 0.75,
-          py: 0.625,
-          borderBottom: "1px solid",
-          borderColor: "rgba(139, 155, 110, 0.22)",
-          backgroundColor: "rgba(139, 155, 110, 0.08)",
+          gap: 0.25,
+          padding: "3px",
+          borderRadius: "7px",
+          backgroundColor: "rgba(251, 248, 239, 0.85)",
+          backdropFilter: "blur(8px)",
+          border: "1px solid rgba(139, 155, 110, 0.22)",
+          boxShadow: "0 1px 2px rgba(42, 37, 32, 0.05)",
           ...theme.applyStyles("dark", {
-            borderColor: "rgba(186, 200, 160, 0.2)",
-            backgroundColor: "rgba(186, 200, 160, 0.06)",
+            backgroundColor: "rgba(20, 18, 11, 0.85)",
+            border: "1px solid rgba(186, 200, 160, 0.18)",
+            boxShadow: "0 1px 2px rgba(0, 0, 0, 0.4)",
           }),
         })}
       >
         <Box
           component="button"
-          ref={triggerRef}
           onClick={handleOpen}
           type="button"
           sx={(theme) => ({
             display: "flex",
             alignItems: "center",
-            gap: 0.5,
+            gap: 0.375,
             px: 0.875,
-            py: 0.375,
+            height: 24,
             border: "none",
-            borderRadius: "6px",
+            borderRadius: "5px",
             backgroundColor: "transparent",
             cursor: "pointer",
             fontFamily: "'SF Mono', 'JetBrains Mono', 'Fira Code', Menlo, monospace",
-            fontSize: "0.72rem",
+            fontSize: "0.7rem",
             fontWeight: 600,
             letterSpacing: "-0.005em",
             color: "text.secondary",
             transition: "all 0.15s ease",
             "&:hover": {
-              backgroundColor: "rgba(139, 155, 110, 0.14)",
+              backgroundColor: "rgba(139, 155, 110, 0.16)",
               color: "text.primary",
             },
             ...theme.applyStyles("dark", {
               "&:hover": {
-                backgroundColor: "rgba(186, 200, 160, 0.12)",
+                backgroundColor: "rgba(186, 200, 160, 0.14)",
               },
             }),
           })}
         >
           {currentLabel}
-          <KeyboardArrowDownRoundedIcon sx={{ fontSize: 14, opacity: 0.7 }} />
+          <KeyboardArrowDownRoundedIcon sx={{ fontSize: 13, opacity: 0.7 }} />
         </Box>
         <Tooltip title={copied ? "Copied" : "Copy"}>
           <IconButton
             onClick={handleCopy}
             size="small"
             sx={(theme) => ({
-              width: 26,
-              height: 26,
+              width: 24,
+              height: 24,
+              borderRadius: "5px",
               color: "text.secondary",
-              "&:hover": { backgroundColor: "rgba(139, 155, 110, 0.14)", color: "text.primary" },
+              "&:hover": { backgroundColor: "rgba(139, 155, 110, 0.16)", color: "text.primary" },
               ...theme.applyStyles("dark", {
-                "&:hover": { backgroundColor: "rgba(186, 200, 160, 0.12)" },
+                "&:hover": { backgroundColor: "rgba(186, 200, 160, 0.14)" },
               }),
             })}
           >
-            {copied ? <CheckRoundedIcon sx={{ fontSize: 13 }} /> : <ContentCopyRoundedIcon sx={{ fontSize: 13 }} />}
+            {copied ? <CheckRoundedIcon sx={{ fontSize: 12 }} /> : <ContentCopyRoundedIcon sx={{ fontSize: 12 }} />}
           </IconButton>
         </Tooltip>
       </Box>
@@ -192,8 +198,8 @@ export function CodeBlock({ node, updateAttributes, extension }: NodeViewProps) 
         open={Boolean(anchor)}
         anchorEl={anchor}
         onClose={() => setAnchor(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "left" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
         slotProps={{
           paper: {
             sx: {

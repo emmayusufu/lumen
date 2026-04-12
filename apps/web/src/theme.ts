@@ -119,7 +119,7 @@ export const theme = extendTheme({
       palette: {
         primary: { main: "#8B9B6E", light: "#D5DDBF", dark: "#5E6B47" },
         secondary: { main: "#B8804A" },
-        background: { default: "#F6F2E9", paper: "#FAF8F3" },
+        background: { default: "#EEE8D8", paper: "#FAF8F3" },
         text: { primary: "#2A2520", secondary: "#6B6358" },
         divider: "#E6DFD0",
       },
@@ -128,7 +128,7 @@ export const theme = extendTheme({
       palette: {
         primary: { main: "#BAC8A0", light: "#384230", dark: "#A3B087" },
         secondary: { main: "#D4A574" },
-        background: { default: "#16140F", paper: "#1D1B15" },
+        background: { default: "#121006", paper: "#1D1B15" },
         text: { primary: "#EBE6D9", secondary: "#9E998C" },
         divider: "#2A2821",
       },

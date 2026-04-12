@@ -30,7 +30,6 @@ export function DocSidebar({ docs, currentId, creating, onCreate }: Props) {
 
   return (
     <Box
-      className="lumen-fade"
       sx={(theme) => ({
         width: 264,
         flexShrink: 0,

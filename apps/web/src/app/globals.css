@@ -150,7 +150,7 @@ body {
 }
 .lumen-codeblock pre {
   margin: 0;
-  padding: 14px 18px;
+  padding: 44px 18px 18px 18px;
   overflow-x: auto;
   font-size: 0.86rem;
   line-height: 1.65;
