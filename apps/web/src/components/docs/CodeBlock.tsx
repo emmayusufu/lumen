@@ -19,7 +19,8 @@ const LANGUAGE_LABELS: Record<string, string> = {
   javascript: "JavaScript",
   typescript: "TypeScript",
   python: "Python",
-  bash: "Shell",
+  "python-repl": "Python REPL",
+  bash: "Bash",
   shell: "Shell",
   go: "Go",
   rust: "Rust",
@@ -39,6 +40,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
   markdown: "Markdown",
   sql: "SQL",
   php: "PHP",
+  "php-template": "PHP Template",
   ruby: "Ruby",
   r: "R",
   lua: "Lua",
@@ -47,9 +49,14 @@ const LANGUAGE_LABELS: Record<string, string> = {
   diff: "Diff",
   makefile: "Makefile",
   objectivec: "Objective-C",
+  arduino: "Arduino",
+  ini: "INI",
+  vbnet: "VB.NET",
+  wasm: "WebAssembly",
 };
 
-const labelFor = (lang: string) => LANGUAGE_LABELS[lang] ?? lang;
+const labelFor = (lang: string) =>
+  LANGUAGE_LABELS[lang] ?? lang.charAt(0).toUpperCase() + lang.slice(1);
 
 export function CodeBlock({ node, updateAttributes, extension }: NodeViewProps) {
   const [copied, setCopied] = useState(false);
@@ -64,7 +71,19 @@ export function CodeBlock({ node, updateAttributes, extension }: NodeViewProps) 
     [supported],
   );
   const current: string = node.attrs.language ?? "";
-  const currentLabel = current ? labelFor(current) : "Auto";
+
+  const detected = useMemo(() => {
+    if (current || !node.textContent.trim()) return null;
+    try {
+      const result = lowlight?.highlightAuto?.(node.textContent);
+      const lang = result?.data?.language as string | undefined;
+      return lang && supported.includes(lang) ? lang : null;
+    } catch {
+      return null;
+    }
+  }, [current, node.textContent, lowlight, supported]);
+
+  const currentLabel = current ? labelFor(current) : detected ? labelFor(detected) : "Plain text";
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -237,7 +256,14 @@ export function CodeBlock({ node, updateAttributes, extension }: NodeViewProps) 
               "&:hover": { backgroundColor: "rgba(139, 155, 110, 0.1)" },
             }}
           >
-            Auto-detect
+            <Box component="span">
+              Auto-detect
+              {detected && (
+                <Box component="span" sx={{ ml: 0.75, opacity: 0.65, fontStyle: "normal", fontSize: "0.7rem" }}>
+                  · {labelFor(detected)}
+                </Box>
+              )}
+            </Box>
             {!current && <CheckRoundedIcon sx={{ fontSize: 13, color: "primary.main" }} />}
           </Box>
           {filtered.length === 0 ? (
