@@ -12,6 +12,7 @@ from app.db import sessions as db_sessions
 from app.graph import build_graph
 from app.middleware.auth import attach_user, current_user
 from app.models.user import User
+from app.routers.ai import router as ai_router
 from app.routers.auth import router as auth_router
 from app.routers.docs import router as docs_router
 from app.routers.sessions import router as sessions_router
@@ -42,6 +43,7 @@ app.include_router(auth_router)
 app.include_router(sessions_router)
 app.include_router(docs_router)
 app.include_router(users_router)
+app.include_router(ai_router)
 
 
 def _initial_state(query: str) -> dict:
