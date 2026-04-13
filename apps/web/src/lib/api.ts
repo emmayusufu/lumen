@@ -161,3 +161,83 @@ export async function removeCollaborator(docId: string, userId: string): Promise
   );
   if (!response.ok) throw new Error(`Failed to remove collaborator: ${response.statusText}`);
 }
+
+export type InlineAction =
+  | "improve"
+  | "shorter"
+  | "longer"
+  | "grammar"
+  | "tone"
+  | "summarize"
+  | "continue"
+  | "outline"
+  | "custom";
+
+export type InlineTone =
+  | "professional"
+  | "casual"
+  | "friendly"
+  | "confident"
+  | "persuasive";
+
+export interface InlineAIRequest {
+  action: InlineAction;
+  tone?: InlineTone;
+  prompt?: string;
+  selection?: string;
+  context?: string;
+  topic?: string;
+}
+
+export type InlineEvent =
+  | { type: "status"; stage: string; action?: string }
+  | { type: "token"; text: string }
+  | { type: "draft_complete"; text: string }
+  | { type: "revision"; text: string }
+  | { type: "done"; final: string }
+  | { type: "error"; message: string };
+
+export async function streamInlineAI(
+  req: InlineAIRequest,
+  onEvent: (event: InlineEvent) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/ai/inline`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(req),
+    signal,
+  });
+
+  if (!response.ok || !response.body) {
+    throw new Error(`Inline AI request failed: ${response.status}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const chunks = buffer.split("\n\n");
+    buffer = chunks.pop() ?? "";
+    for (const chunk of chunks) {
+      const lines = chunk.split("\n");
+      let eventName = "";
+      let dataStr = "";
+      for (const line of lines) {
+        if (line.startsWith("event: ")) eventName = line.slice(7).trim();
+        else if (line.startsWith("data: ")) dataStr = line.slice(6);
+      }
+      if (!eventName || !dataStr) continue;
+      try {
+        const parsed = JSON.parse(dataStr);
+        onEvent({ type: eventName, ...parsed } as InlineEvent);
+      } catch {
+        // skip malformed
+      }
+    }
+  }
+}
