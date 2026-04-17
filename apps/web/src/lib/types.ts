@@ -53,3 +53,37 @@ export interface UserSearchResult {
   display_name: string | null;
   email: string;
 }
+
+export interface Profile {
+  id: string;
+  org_id: string;
+  email: string;
+  name: string;
+  is_admin: boolean;
+}
+
+export interface CredentialInfo {
+  configured: boolean;
+  last_four: string | null;
+  updated_at: string | null;
+}
+
+export interface CredentialsState {
+  user: CredentialInfo;
+  workspace: CredentialInfo;
+}
+
+export interface CollaboratorDocRef {
+  doc_id: string;
+  doc_title: string;
+  role: "editor" | "viewer";
+}
+
+export interface CollaboratorSummary {
+  user_id: string;
+  email: string;
+  display_name: string | null;
+  doc_count: number;
+  roles: string[];
+  docs: CollaboratorDocRef[];
+}

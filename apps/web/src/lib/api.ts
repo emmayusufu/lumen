@@ -1,4 +1,13 @@
-import type { Session, SessionDetail, Doc, DocDetail, UserSearchResult } from "@/lib/types";
+import type {
+  CollaboratorSummary,
+  CredentialsState,
+  Doc,
+  DocDetail,
+  Profile,
+  Session,
+  SessionDetail,
+  UserSearchResult,
+} from "@/lib/types";
 
 const API_BASE = "/api/backend";
 
@@ -240,4 +249,93 @@ export async function streamInlineAI(
       }
     }
   }
+}
+
+export async function fetchProfile(): Promise<Profile> {
+  const res = await apiFetch(`${API_BASE}/api/v1/settings/profile`);
+  if (!res.ok) throw new Error("Failed to fetch profile");
+  return res.json();
+}
+
+export async function updateProfile(patch: {
+  name?: string;
+  email?: string;
+  current_password?: string;
+}): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/api/v1/settings/profile`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? "Update failed");
+  }
+}
+
+export async function changePassword(body: {
+  current_password: string;
+  new_password: string;
+}): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/api/v1/settings/password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail ?? "Password change failed");
+  }
+}
+
+export async function fetchCredentials(): Promise<CredentialsState> {
+  const res = await apiFetch(`${API_BASE}/api/v1/settings/credentials`);
+  if (!res.ok) throw new Error("Failed to fetch credentials");
+  return res.json();
+}
+
+export async function setUserCredential(api_key: string): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/api/v1/settings/credentials/user`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ api_key }),
+  });
+  if (!res.ok) throw new Error("Failed to set credential");
+}
+
+export async function deleteUserCredential(): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/api/v1/settings/credentials/user`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete credential");
+}
+
+export async function setWorkspaceCredential(api_key: string): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/api/v1/settings/credentials/workspace`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ api_key }),
+  });
+  if (!res.ok) throw new Error("Failed to set workspace credential");
+}
+
+export async function deleteWorkspaceCredential(): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/api/v1/settings/credentials/workspace`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete workspace credential");
+}
+
+export async function fetchMyCollaborators(): Promise<CollaboratorSummary[]> {
+  const res = await apiFetch(`${API_BASE}/api/v1/content/collaborators/my`);
+  if (!res.ok) throw new Error("Failed to fetch collaborators");
+  return res.json();
+}
+
+export async function bulkRemoveCollaborator(userId: string): Promise<{ removed_count: number }> {
+  const res = await apiFetch(`${API_BASE}/api/v1/content/collaborators/${userId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to remove collaborator");
+  return res.json();
 }

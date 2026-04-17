@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-interface CurrentUser {
+export interface CurrentUser {
   id: string;
   email: string;
   name: string;
   orgId: string;
+  isAdmin: boolean;
 }
 
 export function useCurrentUser(): CurrentUser | null {
@@ -25,7 +26,13 @@ export function useCurrentUser(): CurrentUser | null {
       })
       .then((data) => {
         if (!data) return;
-        setUser({ id: data.id, email: data.email, name: data.name, orgId: data.org_id });
+        setUser({
+          id: data.id,
+          email: data.email,
+          name: data.name,
+          orgId: data.org_id,
+          isAdmin: Boolean(data.is_admin),
+        });
       })
       .catch(() => router.push("/login"));
   }, [router]);
