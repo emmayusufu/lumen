@@ -48,6 +48,36 @@ export function FormInput({ label, required, type, error, errorText, helperText,
         variant="outlined"
         fullWidth
         error={!!error}
+        sx={(theme) => ({
+          "& .MuiOutlinedInput-root": {
+            borderRadius: "6px",
+            transition: "background-color 0.15s",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderWidth: "1px",
+              borderColor: "rgba(135, 131, 120, 0.35)",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "rgba(135, 131, 120, 0.55)",
+            },
+            "&.Mui-focused": { backgroundColor: "transparent" },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderWidth: "1px",
+              borderColor: "primary.main",
+            },
+            "&.Mui-error .MuiOutlinedInput-notchedOutline": {
+              borderWidth: "1px",
+              borderColor: "error.main",
+            },
+            ...theme.applyStyles("dark", {
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "rgba(255, 255, 255, 0.15)",
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: "rgba(255, 255, 255, 0.28)",
+              },
+            }),
+          },
+        })}
         slotProps={{
           ...slotProps,
           input: {

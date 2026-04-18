@@ -31,8 +31,8 @@ export function CollaboratorList({ collaborators, isOwner, onAdd, onRemove }: Co
     try {
       await onAdd(email.trim(), role);
       setEmail("");
-    } catch {
-      setError("User not found");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to add collaborator");
     }
   };
 
@@ -101,7 +101,7 @@ export function CollaboratorList({ collaborators, isOwner, onAdd, onRemove }: Co
       {isOwner && (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
           <FormInput
-            label="Invite someone"
+            label="Add by email"
             placeholder="colleague@company.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}

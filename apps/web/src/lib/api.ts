@@ -160,7 +160,12 @@ export async function addCollaborator(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, role }),
   });
-  if (!response.ok) throw new Error(`Failed to add collaborator: ${response.statusText}`);
+  if (!response.ok) {
+    const text = await response.text();
+    let detail = "Failed to add collaborator";
+    try { detail = (JSON.parse(text) as { detail?: string }).detail ?? detail; } catch {}
+    throw new Error(detail);
+  }
 }
 
 export async function removeCollaborator(docId: string, userId: string): Promise<void> {

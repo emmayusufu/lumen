@@ -98,7 +98,7 @@ async def add_collaborator(
         raise HTTPException(status_code=422, detail="role must be 'editor' or 'viewer'")
     target = await users_db.get_user_by_email(body.email)
     if not target:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="No account found with that email. Ask them to sign up first.")
     if target["id"] == user.id:
         raise HTTPException(status_code=422, detail="Cannot add owner as collaborator")
     await db.add_collaborator(doc_id, target["id"], body.role)

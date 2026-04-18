@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Box from "@mui/material/Box";
-import Popover from "@mui/material/Popover";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import { SettingsDialog } from "./SettingsDialog";
 import type { CurrentUser } from "@/hooks/useCurrentUser";
 
 interface Props {
@@ -14,39 +15,16 @@ interface Props {
 }
 
 export function UserMenu({ user }: Props) {
-  const anchorRef = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = useState(false);
-  const router = useRouter();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const handleSignOut = async () => {
     await fetch("/api/backend/api/v1/auth/logout", { method: "POST" });
     window.location.href = "/login";
   };
 
-  const handleSettings = () => {
-    setOpen(false);
-    router.push("/settings/profile");
-  };
-
   return (
     <>
-      <Box
-        ref={anchorRef}
-        onClick={() => setOpen(true)}
-        sx={(theme) => ({
-          cursor: "pointer",
-          px: 0.75,
-          py: 0.375,
-          borderRadius: "6px",
-          flex: 1,
-          minWidth: 0,
-          transition: "background-color 0.15s",
-          "&:hover": { backgroundColor: "rgba(42, 37, 32, 0.04)" },
-          ...theme.applyStyles("dark", {
-            "&:hover": { backgroundColor: "rgba(235, 230, 217, 0.05)" },
-          }),
-        })}
-      >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flex: 1, minWidth: 0 }}>
         <Typography
           noWrap
           sx={{
@@ -54,85 +32,49 @@ export function UserMenu({ user }: Props) {
             fontWeight: 600,
             color: "text.secondary",
             opacity: 0.75,
+            flex: 1,
+            minWidth: 0,
+            px: 0.75,
           }}
         >
-          {user.email}
+          {user.name || user.email}
         </Typography>
-      </Box>
-      <Popover
-        open={open}
-        anchorEl={anchorRef.current}
-        onClose={() => setOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "left" }}
-        transformOrigin={{ vertical: "bottom", horizontal: "left" }}
-        slotProps={{
-          paper: {
-            sx: {
-              mb: 0.75,
-              minWidth: 208,
-              borderRadius: "10px",
-              border: "1px solid",
-              borderColor: "divider",
-              boxShadow: "0 12px 32px rgba(42, 37, 32, 0.12)",
-              overflow: "hidden",
-            },
-          },
-        }}
-      >
-        <Box sx={{ px: 1.5, py: 1.25, borderBottom: "1px solid", borderColor: "divider" }}>
-          <Typography noWrap sx={{ fontSize: "0.82rem", fontWeight: 600 }}>
-            {user.name || user.email}
-          </Typography>
-          <Typography
-            sx={{
-              fontSize: "0.62rem",
-              mt: 0.5,
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              fontWeight: 700,
+        <Tooltip title="Settings">
+          <IconButton
+            size="small"
+            onClick={() => setSettingsOpen(true)}
+            sx={(theme) => ({
+              width: 26,
+              height: 26,
               color: "text.secondary",
-              opacity: 0.65,
-            }}
+              opacity: 0.55,
+              transition: "opacity 0.15s",
+              "&:hover": { opacity: 1 },
+              ...theme.applyStyles("dark", { opacity: 0.5 }),
+            })}
           >
-            {user.isAdmin ? "Admin" : "Member"}
-          </Typography>
-        </Box>
-        <MenuItem icon={<SettingsRoundedIcon sx={{ fontSize: 14 }} />} label="Settings" onClick={handleSettings} />
-        <MenuItem icon={<LogoutRoundedIcon sx={{ fontSize: 14 }} />} label="Sign out" onClick={handleSignOut} />
-      </Popover>
+            <SettingsRoundedIcon sx={{ fontSize: 14 }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Sign out">
+          <IconButton
+            size="small"
+            onClick={handleSignOut}
+            sx={(theme) => ({
+              width: 26,
+              height: 26,
+              color: "text.secondary",
+              opacity: 0.55,
+              transition: "opacity 0.15s",
+              "&:hover": { opacity: 1 },
+              ...theme.applyStyles("dark", { opacity: 0.5 }),
+            })}
+          >
+            <LogoutRoundedIcon sx={{ fontSize: 14 }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>
-  );
-}
-
-function MenuItem({
-  icon,
-  label,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <Box
-      onClick={onClick}
-      sx={(theme) => ({
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-        px: 1.5,
-        py: 0.875,
-        cursor: "pointer",
-        fontSize: "0.82rem",
-        color: "text.primary",
-        "&:hover": { backgroundColor: "rgba(139, 155, 110, 0.12)" },
-        ...theme.applyStyles("dark", {
-          "&:hover": { backgroundColor: "rgba(186, 200, 160, 0.12)" },
-        }),
-      })}
-    >
-      {icon}
-      {label}
-    </Box>
   );
 }

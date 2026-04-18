@@ -6,7 +6,6 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { UserMenu } from "@/components/settings/UserMenu";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import type { Doc } from "@/lib/types";
@@ -252,9 +251,6 @@ export function DocSidebar({ docs, currentId, creating, onCreate }: Props) {
         }}
       >
         {user && <UserMenu user={user} />}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexShrink: 0 }}>
-          <ThemeToggle />
-        </Box>
       </Box>
     </Box>
   );
