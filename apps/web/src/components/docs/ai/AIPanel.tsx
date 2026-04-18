@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Box from "@mui/material/Box";
 import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
@@ -182,6 +183,28 @@ export function AIPanel({
           <Typography sx={{ fontSize: "0.78rem", color: "error.main" }}>
             {ai.error ?? "Request failed"}
           </Typography>
+        </Box>
+      )}
+
+      {ai.status === "no_credentials" && (
+        <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1 }}>
+          <Typography sx={{ fontSize: "0.82rem", color: "text.primary" }}>
+            Ask AI needs a DeepSeek API key.
+          </Typography>
+          <Box
+            component={Link}
+            href="/settings/api-keys"
+            onClick={onClose}
+            sx={{
+              fontSize: "0.78rem",
+              fontWeight: 600,
+              color: "primary.main",
+              textDecoration: "none",
+              "&:hover": { textDecoration: "underline" },
+            }}
+          >
+            Configure in Settings →
+          </Box>
         </Box>
       )}
     </Popover>

@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { streamInlineAI, type InlineAIRequest, type InlineEvent } from "@/lib/api";
 
-export type InlineAIStatus = "idle" | "generating" | "preview" | "error";
+export type InlineAIStatus = "idle" | "generating" | "preview" | "error" | "no_credentials";
 
 interface UseInlineAIReturn {
   status: InlineAIStatus;
@@ -53,6 +53,12 @@ export function useInlineAI(): UseInlineAIReturn {
       setStatus((s) => (s === "generating" ? "preview" : s));
     } catch (err) {
       if ((err as Error).name === "AbortError") return;
+      const code = (err as { code?: string }).code;
+      if (code === "no_credentials") {
+        setError(err instanceof Error ? err.message : "Configure AI in Settings.");
+        setStatus("no_credentials");
+        return;
+      }
       setError(err instanceof Error ? err.message : "Request failed");
       setStatus("error");
     }

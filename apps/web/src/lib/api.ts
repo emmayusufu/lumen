@@ -218,6 +218,16 @@ export async function streamInlineAI(
     signal,
   });
 
+  if (response.status === 400) {
+    const body = await response.json().catch(() => ({}));
+    const detail = body.detail;
+    if (detail && typeof detail === "object" && detail.code === "no_credentials") {
+      throw Object.assign(new Error(detail.message ?? "Configure AI in Settings."), {
+        code: "no_credentials" as const,
+      });
+    }
+  }
+
   if (!response.ok || !response.body) {
     throw new Error(`Inline AI request failed: ${response.status}`);
   }
