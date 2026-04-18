@@ -25,5 +25,14 @@ def create_token(user_id: str, email: str, org_id: str, name: str) -> str:
     return jwt.encode(payload, _SECRET, algorithm=_ALGORITHM)
 
 
+def create_ws_token(user_id: str, name: str) -> str:
+    payload = {
+        "sub": user_id,
+        "name": name,
+        "exp": datetime.now(UTC) + timedelta(hours=2),
+    }
+    return jwt.encode(payload, _SECRET, algorithm=_ALGORITHM)
+
+
 def decode_token(token: str) -> dict[str, Any]:
     return jwt.decode(token, _SECRET, algorithms=[_ALGORITHM])

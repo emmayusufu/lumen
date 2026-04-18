@@ -9,7 +9,7 @@ from app.config import OPA_URL, TOKEN_TTL_DAYS
 from app.db import users as db
 from app.middleware.auth import current_user
 from app.models.user import User
-from app.utils.token import create_token, decode_token
+from app.utils.token import create_token, create_ws_token, decode_token
 
 _COOKIE = "token"
 _COOKIE_MAX_AGE = TOKEN_TTL_DAYS * 24 * 60 * 60
@@ -76,6 +76,11 @@ async def logout(request: Request, response: Response):
         if payload:
             await _revoke(payload["jti"], int(payload["exp"]))
     response.delete_cookie(key=_COOKIE, path="/")
+
+
+@router.get("/ws-token")
+async def ws_token(user: User = Depends(current_user)):
+    return {"token": create_ws_token(user.id, user.name)}
 
 
 @router.get("/me")
