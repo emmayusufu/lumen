@@ -6,7 +6,7 @@ import { PersonRow } from "./PersonRow";
 import { useMyCollaborators } from "@/hooks/useMyCollaborators";
 
 export function PeopleList() {
-  const { list, loading, removeFromAll, removeFromSingleDoc } = useMyCollaborators();
+  const { list, loading, removeFromAll, removeFromSingleDoc, updateRoleOnDoc } = useMyCollaborators();
 
   if (loading) {
     return (
@@ -40,6 +40,7 @@ export function PeopleList() {
           person={p}
           onRemoveFromDoc={(docId) => removeFromSingleDoc(docId, p.user_id)}
           onRemoveFromAll={() => removeFromAll(p.user_id)}
+          onUpdateRole={(docId, role) => updateRoleOnDoc(docId, p.user_id, role)}
         />
       ))}
     </Box>

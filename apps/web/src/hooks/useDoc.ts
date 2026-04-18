@@ -7,6 +7,7 @@ import {
   updateDoc as apiUpdateDoc,
   addCollaborator as apiAddCollaborator,
   removeCollaborator as apiRemoveCollaborator,
+  updateCollaboratorRole as apiUpdateCollaboratorRole,
 } from "@/lib/api";
 
 interface UseDocReturn {
@@ -15,6 +16,7 @@ interface UseDocReturn {
   saveTitle: (title: string) => Promise<void>;
   saveContent: (content: string) => Promise<void>;
   addCollaborator: (email: string, role: "editor" | "viewer") => Promise<void>;
+  updateCollaboratorRole: (userId: string, role: "editor" | "viewer") => Promise<void>;
   removeCollaborator: (userId: string) => Promise<void>;
   saveError: string | null;
   clearSaveError: () => void;
@@ -85,6 +87,21 @@ export function useDoc(id: string): UseDocReturn {
     [id],
   );
 
+  const updateCollaboratorRole = useCallback(
+    async (userId: string, role: "editor" | "viewer") => {
+      setDoc((d) =>
+        d ? { ...d, collaborators: d.collaborators.map((c) => c.user_id === userId ? { ...c, role } : c) } : d
+      );
+      try {
+        await apiUpdateCollaboratorRole(id, userId, role);
+      } catch {
+        const restored = await fetchDoc(id);
+        setDoc(restored);
+      }
+    },
+    [id],
+  );
+
   const removeCollaborator = useCallback(
     async (userId: string) => {
       let prev: DocDetail | null = null;
@@ -105,5 +122,5 @@ export function useDoc(id: string): UseDocReturn {
 
   const clearSaveError = useCallback(() => setSaveError(null), []);
 
-  return { doc, isSaving, saveTitle, saveContent, addCollaborator, removeCollaborator, saveError, clearSaveError };
+  return { doc, isSaving, saveTitle, saveContent, addCollaborator, updateCollaboratorRole, removeCollaborator, saveError, clearSaveError };
 }

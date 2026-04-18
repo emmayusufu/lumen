@@ -40,7 +40,7 @@ function formatDate(iso?: string) {
 export default function DocPage({ params }: Props) {
   const { id } = use(params);
   const router = useRouter();
-  const { doc, isSaving, saveTitle, saveContent, addCollaborator, removeCollaborator, saveError, clearSaveError } = useDoc(id);
+  const { doc, isSaving, saveTitle, saveContent, addCollaborator, updateCollaboratorRole, removeCollaborator, saveError, clearSaveError } = useDoc(id);
   const { docs, createDoc, refresh: refreshDocs } = useDocs();
   const [researchOpen, setResearchOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -189,6 +189,7 @@ export default function DocPage({ params }: Props) {
               collaborators={doc.collaborators}
               isOwner={doc.role === "owner"}
               onAdd={addCollaborator}
+              onUpdateRole={updateCollaboratorRole}
               onRemove={removeCollaborator}
             />
           </Box>

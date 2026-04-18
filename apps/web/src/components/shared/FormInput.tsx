@@ -50,8 +50,7 @@ export function FormInput({ label, required, type, error, errorText, helperText,
         error={!!error}
         sx={(theme) => ({
           "& .MuiOutlinedInput-root": {
-            borderRadius: "6px",
-            transition: "background-color 0.15s",
+            backgroundColor: "#ffffff",
             "& .MuiOutlinedInput-notchedOutline": {
               borderWidth: "1px",
               borderColor: "rgba(135, 131, 120, 0.35)",
@@ -59,7 +58,7 @@ export function FormInput({ label, required, type, error, errorText, helperText,
             "&:hover .MuiOutlinedInput-notchedOutline": {
               borderColor: "rgba(135, 131, 120, 0.55)",
             },
-            "&.Mui-focused": { backgroundColor: "transparent" },
+            "&.Mui-focused": { backgroundColor: "#ffffff" },
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
               borderWidth: "1px",
               borderColor: "primary.main",
@@ -69,6 +68,8 @@ export function FormInput({ label, required, type, error, errorText, helperText,
               borderColor: "error.main",
             },
             ...theme.applyStyles("dark", {
+              backgroundColor: "rgba(255, 255, 255, 0.06)",
+              "&.Mui-focused": { backgroundColor: "rgba(255, 255, 255, 0.06)" },
               "& .MuiOutlinedInput-notchedOutline": {
                 borderColor: "rgba(255, 255, 255, 0.15)",
               },

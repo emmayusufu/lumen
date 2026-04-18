@@ -104,6 +104,21 @@ async def add_collaborator(
     await db.add_collaborator(doc_id, target["id"], body.role)
 
 
+class UpdateCollaboratorRequest(BaseModel):
+    role: str
+
+
+@router.patch("/{doc_id}/collaborators/{collab_user_id}", status_code=204)
+async def update_collaborator_role(
+    doc_id: uuid.UUID, collab_user_id: str, body: UpdateCollaboratorRequest, user: User = Depends(current_user)
+):
+    role = await db.get_role(doc_id, user.id)
+    await authorize(role, "manage_collaborators")
+    if body.role not in ("editor", "viewer"):
+        raise HTTPException(status_code=422, detail="role must be 'editor' or 'viewer'")
+    await db.add_collaborator(doc_id, collab_user_id, body.role)
+
+
 @router.delete("/{doc_id}/collaborators/{collab_user_id}", status_code=204)
 async def remove_collaborator(
     doc_id: uuid.UUID, collab_user_id: str, user: User = Depends(current_user)

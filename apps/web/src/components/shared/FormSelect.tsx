@@ -35,7 +35,42 @@ export function FormSelect({
         </Box>
       )}
       <FormControl fullWidth={fullWidth} error={error} required={required}>
-        <Select variant="outlined" error={error} {...rest}>
+        <Select
+          variant="outlined"
+          error={error}
+          MenuProps={{
+            PaperProps: {
+              sx: (theme) => ({
+                boxShadow: "none",
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: "8px",
+                py: 0.5,
+                backgroundColor: "#EEE8D8",
+                ...theme.applyStyles("dark", { backgroundColor: "#121006" }),
+                "& .MuiMenuItem-root": {
+                  borderRadius: "6px",
+                  mx: "4px",
+                  width: "calc(100% - 8px)",
+                },
+              }),
+            },
+          }}
+          sx={(theme) => ({
+            backgroundColor: "#ffffff",
+            height: "42px",
+            borderRadius: "8px",
+            "& .MuiOutlinedInput-notchedOutline": { borderRadius: "8px", borderColor: "rgba(135, 131, 120, 0.35)" },
+            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(135, 131, 120, 0.55)" },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderWidth: "1px", borderColor: "primary.main" },
+            ...theme.applyStyles("dark", {
+              backgroundColor: "rgba(255, 255, 255, 0.06)",
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.15)" },
+              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.28)" },
+            }),
+          })}
+          {...rest}
+        >
           {children}
         </Select>
       </FormControl>

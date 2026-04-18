@@ -168,6 +168,22 @@ export async function addCollaborator(
   }
 }
 
+export async function updateCollaboratorRole(
+  docId: string,
+  userId: string,
+  role: "editor" | "viewer",
+): Promise<void> {
+  const response = await apiFetch(
+    `${API_BASE}/api/v1/content/docs/${docId}/collaborators/${userId}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role }),
+    },
+  );
+  if (!response.ok) throw new Error(`Failed to update role: ${response.statusText}`);
+}
+
 export async function removeCollaborator(docId: string, userId: string): Promise<void> {
   const response = await apiFetch(
     `${API_BASE}/api/v1/content/docs/${docId}/collaborators/${userId}`,

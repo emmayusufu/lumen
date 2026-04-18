@@ -164,7 +164,7 @@ export default function LoginPage() {
               fullWidth
               disabled={loading}
               endIcon={loading ? <CircularProgress size={15} color="inherit" /> : <ArrowForwardIcon />}
-              sx={{ borderRadius: "10px", py: 1.4, fontWeight: 700, mt: 0.5 }}
+              sx={{ fontWeight: 700, mt: 0.5 }}
             >
               {loading ? "Signing in…" : "Sign in"}
             </Button>

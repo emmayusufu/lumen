@@ -23,7 +23,11 @@ export const theme = extendTheme({
   components: {
     MuiButton: {
       styleOverrides: {
-        root: { borderRadius: 8, padding: "8px 20px" },
+        root: { borderRadius: 8, boxShadow: "none" },
+        sizeMedium: { height: 42, padding: "0 20px" },
+        sizeSmall: { padding: "0 14px" },
+        sizeLarge: { padding: "0 24px" },
+        containedPrimary: { "&:hover": { boxShadow: "none" } },
       },
     },
     MuiPaper: {
@@ -45,7 +49,7 @@ export const theme = extendTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           "& .MuiOutlinedInput-root": {
-            height: 43,
+            height: 42,
             borderRadius: "8px",
             fontSize: "0.875rem",
             backgroundColor: "#FAF8F3",
@@ -83,8 +87,8 @@ export const theme = extendTheme({
     MuiSelect: {
       styleOverrides: {
         root: ({ theme }) => ({
-          height: 43,
-          borderRadius: "8px",
+          height: 46,
+          borderRadius: "6px",
           fontSize: "0.875rem",
           backgroundColor: "#FAF8F3",
           transition: "all 0.2s ease",

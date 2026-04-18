@@ -199,10 +199,8 @@ export default function SignupPage() {
               endIcon={loading ? undefined : <ArrowForwardIcon />}
               disabled={loading}
               sx={{
-                py: 1.5,
                 mt: 0.5,
                 fontWeight: 700,
-                borderRadius: "10px",
                 boxShadow: "0 4px 20px rgba(163,176,135,0.3)",
                 "&:hover:not(:disabled)": {
                   boxShadow: "0 6px 24px rgba(163,176,135,0.4)",

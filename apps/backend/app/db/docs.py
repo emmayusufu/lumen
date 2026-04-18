@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from app.db import Acquire
@@ -149,7 +150,16 @@ async def list_collaborators_for_owner(owner_id: str) -> list[dict]:
             """,
             owner_id,
         )
-        return [dict(r) for r in rows]
+        result = []
+        for r in rows:
+            row = dict(r)
+            if row.get("docs"):
+                row["docs"] = [
+                    json.loads(d) if isinstance(d, str) else dict(d)
+                    for d in row["docs"]
+                ]
+            result.append(row)
+        return result
 
 
 async def bulk_remove_collaborator(owner_id: str, user_id: str) -> int:

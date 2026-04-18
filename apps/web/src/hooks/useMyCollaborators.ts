@@ -5,6 +5,7 @@ import {
   bulkRemoveCollaborator,
   fetchMyCollaborators,
   removeCollaborator,
+  updateCollaboratorRole,
 } from "@/lib/api";
 import type { CollaboratorSummary } from "@/lib/types";
 
@@ -41,5 +42,13 @@ export function useMyCollaborators() {
     [refresh],
   );
 
-  return { list, loading, removeFromAll, removeFromSingleDoc, refresh };
+  const updateRoleOnDoc = useCallback(
+    async (docId: string, userId: string, role: "editor" | "viewer") => {
+      await updateCollaboratorRole(docId, userId, role);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  return { list, loading, removeFromAll, removeFromSingleDoc, updateRoleOnDoc, refresh };
 }
