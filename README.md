@@ -99,23 +99,24 @@ You need Docker, a DeepSeek API key, and optionally a GitHub token (raises the c
 
 ```bash
 cp .env.example .env
-# set DEEPSEEK_API_KEY, POSTGRES_PASSWORD, SECRET_KEY
+# set POSTGRES_PASSWORD and SECRET_KEY (32+ chars)
 docker compose up --build
 ```
 
-Open http://localhost:3847 and sign up.
+Open http://localhost:3847 and sign up. After signup, visit **Settings → API Keys** and paste your DeepSeek key — AI actions return a "Configure AI in Settings" prompt until a key is configured.
 
 ### Environment
 
 ```
-DEEPSEEK_API_KEY       your DeepSeek key
 DEEPSEEK_BASE_URL      https://api.deepseek.com
 DEEPSEEK_MODEL         deepseek-chat
 GITHUB_TOKEN           optional
-SECRET_KEY             openssl rand -base64 32
+SECRET_KEY             openssl rand -base64 32 (32+ chars required)
 POSTGRES_PASSWORD      anything
 DATABASE_URL           postgresql://postgres:<pw>@postgres:5432/app
 ```
+
+DeepSeek API keys live in the database, not env. Each user configures their own in Settings → API Keys (encrypted at rest). Workspace admins can also set a shared key that other members use as a fallback.
 
 ### Ports
 
@@ -174,6 +175,18 @@ DELETE /api/v1/content/docs/:id
 GET    /api/v1/content/docs/:id/collaborators
 POST   /api/v1/content/docs/:id/collaborators
 DELETE /api/v1/content/docs/:id/collaborators/:userId
+
+GET    /api/v1/content/collaborators/my
+DELETE /api/v1/content/collaborators/:userId
+
+GET    /api/v1/settings/profile
+PATCH  /api/v1/settings/profile
+POST   /api/v1/settings/password
+GET    /api/v1/settings/credentials
+PUT    /api/v1/settings/credentials/user
+DELETE /api/v1/settings/credentials/user
+PUT    /api/v1/settings/credentials/workspace    (admin)
+DELETE /api/v1/settings/credentials/workspace    (admin)
 
 GET    /api/v1/users/search?email=
 ```
