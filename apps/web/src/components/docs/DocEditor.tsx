@@ -5,7 +5,6 @@ import { useEditor, EditorContent, ReactNodeViewRenderer } from "@tiptap/react";
 import { BubbleMenu, FloatingMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
-import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
 import Placeholder from "@tiptap/extension-placeholder";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { HocuspocusProvider } from "@hocuspocus/provider";
@@ -32,19 +31,10 @@ import { looksLikeMarkdown, markdownToHtml } from "@/lib/markdown";
 
 const COLLAB_URL = process.env.NEXT_PUBLIC_COLLAB_URL ?? "ws://localhost:1234";
 
-const CURSOR_COLORS = ["#8B9B6E", "#B8804A", "#6E8B9B", "#9B6E8B", "#6E9B8B", "#9B8B6E"];
-
-function cursorColor(userId: string): string {
-  let hash = 0;
-  for (let i = 0; i < userId.length; i++) hash = (hash * 31 + userId.charCodeAt(i)) >>> 0;
-  return CURSOR_COLORS[hash % CURSOR_COLORS.length];
-}
-
 interface DocEditorProps {
   docId: string;
   content: string;
   readOnly: boolean;
-  user: { id: string; name: string };
   onContentSave: (content: string) => void;
   onContentChange?: (content: string) => void;
   onAskAI?: () => void;
@@ -59,29 +49,6 @@ const withSlashDelete = (fn: (e: Editor) => void) => (e: Editor) => {
 };
 
 const editorSx = {
-  "& .collaboration-cursor__caret": {
-    borderLeft: "2px solid",
-    borderRight: "none",
-    marginLeft: "-1px",
-    marginRight: "-1px",
-    pointerEvents: "none",
-    position: "relative",
-    wordBreak: "normal",
-  },
-  "& .collaboration-cursor__label": {
-    borderRadius: "3px 3px 3px 0",
-    color: "#fff",
-    fontSize: "0.65rem",
-    fontWeight: 600,
-    left: "-1px",
-    lineHeight: "normal",
-    padding: "1px 5px",
-    position: "absolute",
-    top: "-1.4em",
-    userSelect: "none",
-    whiteSpace: "nowrap",
-    pointerEvents: "none",
-  },
   "& .ProseMirror": {
     outline: "none",
     minHeight: "60vh",
@@ -173,7 +140,7 @@ const LumenCodeBlock = CodeBlockLowlight.extend({
   },
 });
 
-export function DocEditor({ docId, content, readOnly, user, onContentSave, onContentChange, onAskAI }: DocEditorProps) {
+export function DocEditor({ docId, content, readOnly, onContentSave, onContentChange, onAskAI }: DocEditorProps) {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSaved = useRef<string>(content);
   const [wsToken, setWsToken] = useState<string | null>(null);
@@ -234,10 +201,6 @@ export function DocEditor({ docId, content, readOnly, user, onContentSave, onCon
       Placeholder.configure({ placeholder: "Start writing, or type '/' for commands…", showOnlyCurrent: true }),
       ...(provider ? [
         Collaboration.configure({ document: provider.document }),
-        CollaborationCursor.configure({
-          provider,
-          user: { name: user.name, color: cursorColor(user.id) },
-        }),
       ] : []),
     ],
     content: provider ? undefined : content,

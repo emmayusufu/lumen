@@ -300,6 +300,7 @@ export default function DocPage({ params }: Props) {
             />
 
             <DocEditor
+              docId={id}
               content={doc.content}
               readOnly={!canEdit}
               onContentSave={saveContent}
