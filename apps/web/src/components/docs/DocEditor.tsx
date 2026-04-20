@@ -18,7 +18,9 @@ import type { HocuspocusProvider } from "@hocuspocus/provider";
 import { createLowlight, common } from "lowlight";
 import { CodeBlock } from "./CodeBlock";
 import { AIPanel } from "./ai/AIPanel";
+import { CommentComposer } from "./CommentComposer";
 import { uploadImage } from "@/lib/api";
+import { CommentMark } from "@/lib/commentMark";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
@@ -33,6 +35,7 @@ import FormatListNumberedRoundedIcon from "@mui/icons-material/FormatListNumbere
 import FormatQuoteRoundedIcon from "@mui/icons-material/FormatQuoteRounded";
 import FormatStrikethroughIcon from "@mui/icons-material/FormatStrikethrough";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import ChatBubbleOutlineRoundedIcon from "@mui/icons-material/ChatBubbleOutlineRounded";
 import NotesRoundedIcon from "@mui/icons-material/NotesRounded";
 import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
@@ -73,6 +76,9 @@ interface DocEditorProps {
   onContentSave: (content: string) => void;
   onContentChange?: (content: string) => void;
   onAskAI?: () => void;
+  onCreateComment?: (threadId: string, body: string) => Promise<void>;
+  onOpenThread?: (threadId: string) => void;
+  threadIds?: string[];
 }
 
 const withSlashDelete = (fn: (e: Editor) => void) => (e: Editor) => {
@@ -144,6 +150,15 @@ const editorSx = {
       borderRadius: "6px",
       display: "block",
       my: 1.5,
+    },
+    "& .lumen-comment": {
+      backgroundColor: "rgba(228, 184, 74, 0.22)",
+      borderBottom: "1.5px solid rgba(184, 128, 74, 0.55)",
+      borderRadius: "2px",
+      cursor: "pointer",
+      padding: "0 1px",
+      transition: "background-color 0.15s",
+      "&:hover": { backgroundColor: "rgba(228, 184, 74, 0.38)" },
     },
     "& .tableWrapper": {
       overflowX: "auto",
@@ -241,7 +256,7 @@ const LumenCodeBlock = CodeBlockLowlight.extend({
   },
 });
 
-export function DocEditor({ content, readOnly, user, provider, synced, onContentSave, onContentChange, onAskAI }: DocEditorProps) {
+export function DocEditor({ content, readOnly, user, provider, synced, onContentSave, onContentChange, onAskAI, onCreateComment, onOpenThread, threadIds }: DocEditorProps) {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSaved = useRef<string>(content);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -251,6 +266,11 @@ export function DocEditor({ content, readOnly, user, provider, synced, onContent
   const [aiSelection, setAiSelection] = useState("");
   const [aiContext, setAiContext] = useState("");
   const [aiRange, setAiRange] = useState<{ from: number; to: number } | null>(null);
+  const [commentAnchor, setCommentAnchor] = useState<{ nodeType: 1; getBoundingClientRect: () => DOMRect } | null>(null);
+  const [commentOpen, setCommentOpen] = useState(false);
+  const [commentSnippet, setCommentSnippet] = useState("");
+  const [pendingThreadId, setPendingThreadId] = useState<string | null>(null);
+  const [pendingRange, setPendingRange] = useState<{ from: number; to: number } | null>(null);
 
   const flushSave = (html: string) => {
     if (saveTimer.current) {
@@ -284,6 +304,7 @@ export function DocEditor({ content, readOnly, user, provider, synced, onContent
       TableRow,
       TableHeader,
       TableCell,
+      CommentMark,
       ...(provider ? [
         Collaboration.configure({ document: provider.document }),
         CollaborationCursorExt.configure({
@@ -366,6 +387,73 @@ export function DocEditor({ content, readOnly, user, provider, synced, onContent
     return () => window.removeEventListener("keydown", handler);
   }, [onAskAI]);
 
+  const prevThreadIdsRef = useRef<string[] | null>(null);
+  useEffect(() => {
+    if (!editor || !threadIds || readOnly) return;
+    const prev = prevThreadIdsRef.current;
+    prevThreadIdsRef.current = threadIds;
+    const active = new Set(threadIds);
+    const stale: string[] = [];
+    if (prev === null) {
+      editor.state.doc.descendants((node) => {
+        if (!node.isInline) return;
+        for (const m of node.marks) {
+          const tid = m.attrs.threadId;
+          if (m.type.name === "comment" && tid && !active.has(tid) && !stale.includes(tid)) {
+            stale.push(tid);
+          }
+        }
+      });
+    } else {
+      for (const tid of prev) {
+        if (!active.has(tid) && !stale.includes(tid)) stale.push(tid);
+      }
+    }
+    if (stale.length === 0) return;
+    editor.commands.command(({ tr, state, dispatch }) => {
+      const commentMark = state.schema.marks.comment;
+      if (!commentMark) return false;
+      state.doc.descendants((node, pos) => {
+        if (!node.isInline) return;
+        node.marks.forEach((m) => {
+          if (m.type.name === "comment" && stale.includes(m.attrs.threadId)) {
+            tr.removeMark(pos, pos + node.nodeSize, m);
+          }
+        });
+      });
+      if (dispatch) dispatch(tr);
+      return true;
+    });
+  }, [editor, threadIds, readOnly]);
+
+  useEffect(() => {
+    if (!editor || !onOpenThread) return;
+    let dom: Element | null = null;
+    const click = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const el = target.closest(".lumen-comment") as HTMLElement | null;
+      const threadId = el?.getAttribute("data-thread-id");
+      if (threadId) {
+        e.preventDefault();
+        onOpenThread(threadId);
+      }
+    };
+    const attach = () => {
+      try {
+        dom = editor.view.dom;
+        dom.addEventListener("click", click);
+      } catch {
+        // view not ready yet
+      }
+    };
+    attach();
+    if (!dom) editor.on("create", attach);
+    return () => {
+      editor.off("create", attach);
+      if (dom) dom.removeEventListener("click", click);
+    };
+  }, [editor, onOpenThread]);
+
   const openAIFromSelection = () => {
     if (!editor) return;
     const { selection, context, range } = extractSelectionContext(editor);
@@ -384,6 +472,41 @@ export function DocEditor({ content, readOnly, user, provider, synced, onContent
     setAiRange(range);
     setAiMode("selection");
     setAiOpen(true);
+  };
+
+  const openCommentComposer = () => {
+    if (!editor) return;
+    const { from, to } = editor.state.selection;
+    if (from === to) return;
+    const snippet = editor.state.doc.textBetween(from, to, " ").trim();
+    const startCoords = editor.view.coordsAtPos(from);
+    const endCoords = editor.view.coordsAtPos(to);
+    const rect = new DOMRect(
+      startCoords.left,
+      Math.max(startCoords.bottom, endCoords.bottom),
+      Math.max(1, endCoords.right - startCoords.left),
+      1,
+    );
+    setCommentAnchor({ nodeType: 1, getBoundingClientRect: () => rect });
+    setCommentSnippet(snippet);
+    setPendingRange({ from, to });
+    setPendingThreadId(crypto.randomUUID());
+    setCommentOpen(true);
+  };
+
+  const submitComment = async (body: string) => {
+    if (!editor || !pendingThreadId || !pendingRange || !onCreateComment) return;
+    editor
+      .chain()
+      .setTextSelection({ from: pendingRange.from, to: pendingRange.to })
+      .setComment(pendingThreadId)
+      .run();
+    try {
+      await onCreateComment(pendingThreadId, body);
+    } catch (err) {
+      editor.chain().unsetComment(pendingThreadId).run();
+      throw err;
+    }
   };
 
   const openAIFromCursor = () => {
@@ -528,6 +651,31 @@ export function DocEditor({ content, readOnly, user, provider, synced, onContent
               <Icon sx={{ fontSize: 14 }} />
             </IconButton>
           ))}
+          {onCreateComment && (
+            <>
+              <Box
+                sx={{
+                  width: "1px",
+                  height: 16,
+                  mx: 0.375,
+                  backgroundColor: "divider",
+                  alignSelf: "center",
+                }}
+              />
+              <IconButton
+                size="small"
+                onClick={openCommentComposer}
+                sx={{
+                  p: 0.625,
+                  borderRadius: "6px",
+                  color: "text.secondary",
+                  "&:hover": { bgcolor: "action.hover", color: "text.primary" },
+                }}
+              >
+                <ChatBubbleOutlineRoundedIcon sx={{ fontSize: 13 }} />
+              </IconButton>
+            </>
+          )}
         </Paper>
       </BubbleMenu>}
 
@@ -685,6 +833,15 @@ export function DocEditor({ content, readOnly, user, provider, synced, onContent
         onReplace={handleAIReplace}
         onInsertBelow={handleAIInsertBelow}
         onClose={() => setAiOpen(false)}
+      />
+
+      <CommentComposer
+        open={commentOpen}
+        anchor={commentAnchor}
+        snippet={commentSnippet}
+        authorName={user?.name}
+        onSubmit={submitComment}
+        onClose={() => setCommentOpen(false)}
       />
     </Box>
   );

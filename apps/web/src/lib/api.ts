@@ -204,6 +204,67 @@ export async function updateDocVisibility(docId: string, visibility: "private" |
   if (!response.ok) throw new Error(`Failed to update visibility: ${response.statusText}`);
 }
 
+export interface CommentMessage {
+  id: string;
+  thread_id: string;
+  author_id: string;
+  author_name: string | null;
+  author_email: string | null;
+  body: string;
+  created_at: string;
+}
+
+export interface CommentThread {
+  id: string;
+  doc_id: string;
+  resolved: boolean;
+  created_by: string;
+  creator_name: string | null;
+  creator_email: string | null;
+  created_at: string;
+  messages: CommentMessage[];
+}
+
+export async function fetchComments(docId: string): Promise<CommentThread[]> {
+  const res = await apiFetch(`${API_BASE}/api/v1/content/docs/${docId}/comments`);
+  if (!res.ok) throw new Error(`Failed to load comments: ${res.statusText}`);
+  return res.json();
+}
+
+export async function createCommentThread(docId: string, threadId: string, body: string): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/api/v1/content/docs/${docId}/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ thread_id: threadId, body }),
+  });
+  if (!res.ok) throw new Error(`Failed to create comment: ${res.statusText}`);
+}
+
+export async function replyToCommentThread(threadId: string, body: string): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/api/v1/content/comments/${threadId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ body }),
+  });
+  if (!res.ok) throw new Error(`Failed to reply: ${res.statusText}`);
+}
+
+export async function setCommentResolved(threadId: string, resolved: boolean): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/api/v1/content/comments/${threadId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ resolved }),
+  });
+  if (!res.ok) throw new Error(`Failed to update comment: ${res.statusText}`);
+}
+
+export async function deleteCommentThread(threadId: string): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/api/v1/content/comments/${threadId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error(`Failed to delete comment: ${res.statusText}`);
+}
+
 export async function uploadImage(file: File): Promise<string> {
   const presignRes = await apiFetch(`${API_BASE}/api/v1/uploads/presign`, {
     method: "POST",

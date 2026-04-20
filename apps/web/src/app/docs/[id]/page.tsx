@@ -9,17 +9,20 @@ import Snackbar from "@mui/material/Snackbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
+import ChatBubbleOutlineRoundedIcon from "@mui/icons-material/ChatBubbleOutlineRounded";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
+import { CommentsPanel } from "@/components/docs/CommentsPanel";
 import { DocEditor } from "@/components/docs/DocEditor";
 import { DocMenu } from "@/components/docs/DocMenu";
 import { DocResearchPanel } from "@/components/docs/DocResearchPanel";
 import { DocSidebar } from "@/components/docs/DocSidebar";
 import { PresenceAvatars } from "@/components/docs/PresenceAvatars";
 import { ShareButton } from "@/components/docs/ShareButton";
+import { useCollabProvider } from "@/hooks/useCollabProvider";
+import { useComments } from "@/hooks/useComments";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useDoc } from "@/hooks/useDoc";
 import { useDocs } from "@/hooks/useDocs";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useCollabProvider } from "@/hooks/useCollabProvider";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -49,8 +52,11 @@ export default function DocPage({ params }: Props) {
   const { docs, createDoc, refresh: refreshDocs } = useDocs();
   const currentUser = useCurrentUser();
   const { provider, synced } = useCollabProvider(id);
+  const comments = useComments(id);
   const [researchOpen, setResearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [focusedThreadId, setFocusedThreadId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [liveContent, setLiveContent] = useState<string | null>(null);
@@ -217,6 +223,45 @@ export default function DocPage({ params }: Props) {
                 </IconButton>
               </Tooltip>
             )}
+            <Tooltip title="Comments">
+              <IconButton
+                size="small"
+                onClick={() => setCommentsOpen(true)}
+                sx={{
+                  position: "relative",
+                  width: 32,
+                  height: 32,
+                  color: "text.secondary",
+                  opacity: 0.7,
+                  transition: "all 0.2s",
+                  "&:hover": { opacity: 1, color: "primary.main", backgroundColor: "transparent" },
+                }}
+              >
+                <ChatBubbleOutlineRoundedIcon sx={{ fontSize: 15 }} />
+                {comments.threads.filter((t) => !t.resolved).length > 0 && (
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      minWidth: 14,
+                      height: 14,
+                      px: "3px",
+                      borderRadius: "7px",
+                      backgroundColor: "primary.main",
+                      color: "white",
+                      fontSize: "0.6rem",
+                      fontWeight: 700,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {comments.threads.filter((t) => !t.resolved).length}
+                  </Box>
+                )}
+              </IconButton>
+            </Tooltip>
             <ShareButton
               collaborators={doc.collaborators}
               isOwner={doc.role === "owner"}
@@ -343,6 +388,12 @@ export default function DocPage({ params }: Props) {
               onContentSave={saveContent}
               onContentChange={setLiveContent}
               onAskAI={canEdit ? () => setResearchOpen(true) : undefined}
+              onCreateComment={canEdit ? comments.createThread : undefined}
+              onOpenThread={(threadId) => {
+                setFocusedThreadId(threadId);
+                setCommentsOpen(true);
+              }}
+              threadIds={comments.loaded ? comments.threads.map((t) => t.id) : undefined}
             />
           </Box>
         </Box>
@@ -350,6 +401,17 @@ export default function DocPage({ params }: Props) {
       </Box>
 
       <DocResearchPanel open={researchOpen} onClose={() => setResearchOpen(false)} />
+      <CommentsPanel
+        open={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
+        threads={comments.threads}
+        focusedThreadId={focusedThreadId}
+        onFocusThread={setFocusedThreadId}
+        onReply={comments.reply}
+        onResolve={comments.resolve}
+        onDelete={comments.remove}
+        currentUserId={currentUser?.id}
+      />
       <Snackbar open={!!saveError} message={saveError} autoHideDuration={3000} onClose={clearSaveError} />
     </Box>
   );
