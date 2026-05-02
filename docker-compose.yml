@@ -1,0 +1,199 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --save "" --appendonly no
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  opa:
+    image: openpolicyagent/opa:latest-debug
+    command: run --server --addr :8181 /policies
+    volumes:
+      - ./policies:/policies
+    ports:
+      - "8181:8181"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8181/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  kroki:
+    image: yuzutech/kroki:latest
+    ports:
+      - "8000:8000"
+    environment:
+      KROKI_SAFE_MODE: SECURE
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  research-api:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8742:8742"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/app
+      - OPA_URL=http://opa:8181
+      - SECRET_KEY=${SECRET_KEY}
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_PUBLIC_ENDPOINT=http://localhost:9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      - REDIS_URL=redis://redis:6379/0
+      - OTEL_SERVICE_NAME=lumen-backend
+      - OTEL_SERVICE_VERSION=1.0.0
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      - OTEL_EXPORTER_OTLP_HEADERS=${OTEL_EXPORTER_OTLP_HEADERS:-}
+      - SITE_URL=${SITE_URL:-http://localhost:3847}
+    volumes:
+      - ./apps/backend/app:/app/app
+      - ./apps/backend/tests:/app/tests
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8742 --reload
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8742/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      opa:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  collab:
+    build:
+      context: ./apps/collab
+      dockerfile: Dockerfile
+    ports:
+      - "1234:1234"
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/app
+      - SECRET_KEY=${SECRET_KEY}
+      - PORT=1234
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+    entrypoint: >
+      sh -c "
+      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
+      mc mb --ignore-existing local/$${MINIO_BUCKET} &&
+      mc anonymous set none local/$${MINIO_BUCKET}
+      "
+
+  web:
+    image: node:24-alpine
+    working_dir: /repo/apps/web
+    ports:
+      - "3847:3847"
+    volumes:
+      - .:/repo
+      - repo_node_modules:/repo/node_modules
+      - web_node_modules:/repo/apps/web/node_modules
+    command: sh -c "cd /repo && npm install && cd apps/web && npm run dev"
+    environment:
+      - BACKEND_URL=http://research-api:8742
+      - NEXT_PUBLIC_COLLAB_URL=ws://localhost:1234
+      - NEXT_PUBLIC_MINIO_URL=http://localhost:9000
+      - NEXT_PUBLIC_HYPERDX_API_KEY=${NEXT_PUBLIC_HYPERDX_API_KEY:-}
+      - NEXT_PUBLIC_HYPERDX_SERVICE=${NEXT_PUBLIC_HYPERDX_SERVICE:-lumen-web}
+      - NEXT_PUBLIC_HYPERDX_URL=${NEXT_PUBLIC_HYPERDX_URL:-}
+      - KROKI_URL=http://kroki:8000
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3847/ || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    depends_on:
+      - postgres
+      - research-api
+    restart: unless-stopped
+
+  hyperdx:
+    profiles: [observability]
+    image: hyperdx/hyperdx-all-in-one:latest
+    container_name: hyperdx
+    ports:
+      - "8080:8080"
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - hyperdx_data:/data/db
+      - hyperdx_ch:/var/lib/clickhouse
+      - hyperdx_logs:/var/log/clickhouse-server
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  minio_data:
+  repo_node_modules:
+  web_node_modules:
+  hyperdx_data:
+  hyperdx_ch:
+  hyperdx_logs:

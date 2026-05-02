@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+*.whl
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Node / Frontend
+node_modules/
+.next/
+out/
+dist/
+build/
+# Turborepo
+.turbo/
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+.docker/
+
+# Misc
+*.log
+tmp/
+temp/
+
+# Playwright / test artifacts
+.playwright-mcp/
+
+# Screenshots (transient ones in repo root, but allow docs/ and web public assets)
+*.png
+!docs/screenshots/*.png
+!apps/web/public/*.png
+
+# Production runtime artifacts
+backups/
+landing-snapshot.md
