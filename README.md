@@ -4,6 +4,8 @@ A self-hosted document editor with real-time collaboration and inline AI. Think 
 
 **Live demo:** [lumen.jengahq.com](https://lumen.jengahq.com). Feel free to poke around. Don't store anything you can't lose.
 
+![Two browsers on the same doc, one light, one dark, edits sync live](docs/screenshots/demo.gif)
+
 ![Doc editor with comments panel](docs/screenshots/comments.png)
 
 ## Features
