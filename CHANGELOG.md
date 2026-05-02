@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 - 2026-05-03
+
+- Doc title now sets the browser tab title
+- Doc title syncs in real-time to other connected editors (was DB-only, required refresh)
+
 ## 0.1.0 - 2026-05-03
 
 First public release.
