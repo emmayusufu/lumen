@@ -1,0 +1,21 @@
+{
+  "name": "collab",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@hocuspocus/server": "^2.13.5",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.3",
+    "yjs": "^13.6.27"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/pg": "^8.11.11",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  }
+}

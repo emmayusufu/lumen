@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" width="200" height="48">
+  <rect x="0" y="4" width="40" height="40" rx="10" fill="#2dd4bf"/>
+  <circle cx="18" cy="23" r="8.5" stroke="white" stroke-width="2" fill="none"/>
+  <line x1="24" y1="29" x2="29" y2="34" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
+  <line x1="10" y1="23" x2="26" y2="23" stroke="white" stroke-width="1.6" opacity="0.75"/>
+  <ellipse cx="18" cy="23" rx="5" ry="8.5" stroke="white" stroke-width="1.6" fill="none" opacity="0.75"/>
+  <text x="52" y="30" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="19" fill="#e2e8f0" letter-spacing="-0.4">Research</text>
+</svg>
