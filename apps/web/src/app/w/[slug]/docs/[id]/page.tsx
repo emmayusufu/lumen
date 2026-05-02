@@ -150,6 +150,39 @@ export default function DocPage({ params }: Props) {
     el.style.height = `${el.scrollHeight}px`;
   }, [doc?.title]);
 
+  useEffect(() => {
+    const display = doc?.title?.trim() || "Untitled";
+    document.title = `${display} — Lumen`;
+    return () => {
+      document.title = "Lumen";
+    };
+  }, [doc?.title]);
+
+  useEffect(() => {
+    if (!provider?.document || !synced) return;
+    const yMeta = provider.document.getMap<string>("meta");
+    const initial = yMeta.get("title");
+    if (initial === undefined && doc?.title) {
+      yMeta.set("title", doc.title);
+    }
+    const apply = (value: string) => {
+      const el = titleRef.current;
+      if (!el || document.activeElement === el) return;
+      if (el.value === value) return;
+      el.value = value;
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+      document.title = `${value.trim() || "Untitled"} — Lumen`;
+    };
+    if (typeof initial === "string") apply(initial);
+    const handler = () => {
+      const next = yMeta.get("title");
+      if (typeof next === "string") apply(next);
+    };
+    yMeta.observe(handler);
+    return () => yMeta.unobserve(handler);
+  }, [provider, synced, doc?.title]);
+
   if (!doc)
     return mounted ? (
       <Box
@@ -412,6 +445,12 @@ export default function DocPage({ params }: Props) {
                   const el = e.currentTarget;
                   el.style.height = "auto";
                   el.style.height = `${el.scrollHeight}px`;
+                  if (provider?.document) {
+                    provider.document
+                      .getMap<string>("meta")
+                      .set("title", el.value);
+                  }
+                  document.title = `${el.value.trim() || "Untitled"} — Lumen`;
                 }}
                 onBlur={() => {
                   const val = titleRef.current?.value ?? "";
