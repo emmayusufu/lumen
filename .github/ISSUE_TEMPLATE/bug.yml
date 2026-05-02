@@ -1,0 +1,44 @@
+name: Bug report
+description: Something is broken
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what happened instead.
+      placeholder: I clicked X expecting Y, got Z.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: A short list a stranger could follow to land in the same broken state.
+      placeholder: |
+        1. Sign up
+        2. Open a doc
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where you saw it
+      description: Live demo, your own deploy, or local.
+      placeholder: lumen.jengahq.com / local docker compose / self-hosted v0.1.1
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      description: Skip this if it's clearly a backend bug.
+      placeholder: Chrome 134 on macOS 15
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or console output
+      description: Anything from the browser console or `docker compose logs research-api` that looks relevant. Don't paste the whole thing, the noisy parts are usually unrelated.
+      render: shell

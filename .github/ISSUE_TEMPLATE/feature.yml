@@ -1,0 +1,30 @@
+name: Feature idea
+description: Something you'd want Lumen to do that it doesn't yet
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you actually trying to do, and why is it harder than it needs to be today.
+      placeholder: When I ___, I want to ___, but Lumen ___.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Rough proposal
+      description: Optional. If you have an idea of how this should work, drop it here. If you don't, that's fine, the problem statement is the more important half.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds you've tried
+      description: What did you try before deciding the feature was missing.
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Sanity check
+      options:
+        - label: I searched existing issues so this isn't a duplicate
+          required: true

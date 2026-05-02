@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: mailto:kimaswaemma36@gmail.com
+    about: Send anything that looks like a security issue here, not in a public issue.
+  - name: General question
+    url: https://github.com/emmayusufu/lumen/discussions
+    about: For "how do I do X with Lumen" type questions, use Discussions, not Issues.
