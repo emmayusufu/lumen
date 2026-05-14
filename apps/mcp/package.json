@@ -1,0 +1,52 @@
+{
+  "name": "@emmanuelkimaswa/lumen-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Lumen. Exposes the Lumen API to Claude, Cursor, and other MCP-compatible clients.",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "lumen",
+    "claude",
+    "claude-code",
+    "claude-desktop",
+    "cursor",
+    "ai",
+    "llm",
+    "collaboration",
+    "self-hosted"
+  ],
+  "homepage": "https://github.com/emmayusufu/lumen/tree/main/apps/mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emmayusufu/lumen.git",
+    "directory": "apps/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/emmayusufu/lumen/issues"
+  },
+  "author": "Emmanuel Yusufu Kimaswa <kimaswaemma36@gmail.com>",
+  "bin": {
+    "lumen-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

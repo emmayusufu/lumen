@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0 - 2026-05-14
+
+- Add `@emmanuelkimaswa/lumen-mcp`, an MCP server that exposes Lumen's API to Claude Code, Claude Desktop, Cursor, and any other MCP-compatible client. Read, search, create, and append to docs through a normal LLM conversation
+- Tools: `list_workspaces`, `list_docs`, `read_doc`, `create_doc`, `append_to_doc`, `rename_doc`, `list_comments`. Destructive operations intentionally not exposed
+
 ## 0.1.1 - 2026-05-03
 
 - Doc title now sets the browser tab title

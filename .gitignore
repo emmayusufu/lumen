@@ -55,3 +55,4 @@ temp/
 # Production runtime artifacts
 backups/
 landing-snapshot.md
+.mcp.json

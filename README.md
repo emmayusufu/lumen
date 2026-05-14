@@ -100,6 +100,27 @@ The writer streams tokens from DeepSeek using an action-specific prompt. For act
 
 Highlighted passages are wrapped in a custom TipTap mark (`<span data-thread-id="...">`). Because marks are part of the ProseMirror schema, Yjs serializes them along with everything else, so the highlight moves with the text as others edit around it. The thread content (author, body, replies, resolved state) lives in Postgres keyed on `thread_id`. Deleting a thread strips the mark from the doc via a diff against the previous thread list, so highlights don't linger.
 
+## Use Lumen from Claude Code, Cursor, Claude Desktop
+
+There's an MCP server that exposes Lumen's API to any MCP-compatible client, so you can read and write your docs from Claude in conversation. Drop this in your client's config (replace `LUMEN_URL` with your own Lumen and `LUMEN_TOKEN` with the value of your `token` cookie after logging in):
+
+```json
+{
+  "mcpServers": {
+    "lumen": {
+      "command": "npx",
+      "args": ["-y", "@emmanuelkimaswa/lumen-mcp"],
+      "env": {
+        "LUMEN_URL": "https://lumen.example.com",
+        "LUMEN_TOKEN": "..."
+      }
+    }
+  }
+}
+```
+
+Source and full setup notes live in [`apps/mcp/`](apps/mcp/).
+
 ## Running it
 
 You need Docker and a DeepSeek API key.
