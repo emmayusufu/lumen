@@ -19,7 +19,9 @@ npm install -g @emmanuelkimaswa/lumen-mcp
 
 ## Configure
 
-Log in to Lumen in a browser, open DevTools, copy the value of the `token` cookie. That's your `LUMEN_TOKEN`.
+This works against any Lumen instance, whether you're using a public one or running your own self-hosted deployment. Point `LUMEN_URL` at whichever Lumen you have.
+
+Log in to that Lumen in a browser, open DevTools, copy the value of the `token` cookie. That's your `LUMEN_TOKEN`.
 
 ### Claude Desktop / Claude Code
 
@@ -31,7 +33,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (or you
     "lumen": {
       "command": "lumen-mcp",
       "env": {
-        "LUMEN_URL": "https://lumen.jengahq.com",
+        "LUMEN_URL": "https://lumen.example.com",
         "LUMEN_TOKEN": "your-token-here"
       }
     }
